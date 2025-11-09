@@ -3,60 +3,63 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            Bienvenido a Tukancha
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Ingresa a tu cuenta o crea una nueva para acceder al panel de
-            administración.
-          </p>
-          <div className="flex gap-3 pt-4">
+    <div className="flex min-h-screen flex-col bg-zinc-50 font-sans dark:bg-black">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/100 backdrop-blur-md border-b border-zinc-200 dark:bg-black/80 dark:border-zinc-800">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <img src="Logo1.png" alt="" className="h-12" />
+          </div>
+
+          {/* Navigation Buttons */}
+          <div className="flex items-center gap-4">
             <Link
               href="/login"
-              className="rounded-full bg-foreground px-5 py-2 text-background"
+              className="text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100 transition-colors"
             >
-              Entrar
+              Iniciar sesión
             </Link>
-            <Link href="/register" className="rounded-full border px-5 py-2">
-              Registrarse
+            <Link
+              href="/reservas"
+              className="rounded-md bg-[#FFBF2C] px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-[#FFBF2C]/90 transition-colors"
+            >
+              Reservá tu cancha
             </Link>
           </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/8 px-5 transition-colors hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </header>
+
+      {/* Main Content */}
+      <main className="relative flex flex-1 items-center justify-center pt-20 bg-[url('/hero-bg.jpeg')] bg-cover bg-center bg-no-repeat">
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/50" />
+
+        {/* Content */}
+        <div className="relative z-10 flex w-full max-w-3xl flex-col items-center justify-center gap-8 px-16 py-32 text-center">
+          <div className="flex flex-col items-center gap-6">
+            <h1 className="max-w-2xl text-5xl font-bold leading-tight tracking-tight text-white">
+              Bienvenido a Tukancha
+            </h1>
+            <p className="max-w-xl text-xl leading-8 text-zinc-200">
+              La forma mas facil de reservar tu cancha. <br />
+              Encontra tu cancha ideal y reserva en segundos.
+            </p>
+            <div className="flex gap-4 pt-6">
+              <Link
+                href="/reservas"
+                className="rounded-md bg-[#FFBF2C] px-6 py-2.5 text-sm font-medium text-zinc-900 hover:bg-[#FFBF2C]/90 transition-colors"
+              >
+                Reserva una cancha
+              </Link>
+              <Link
+                href="/register"
+                className="rounded-md border border-white/30 bg-white/10 backdrop-blur-sm px-6 py-2.5 text-sm font-medium text-white hover:bg-white/20 transition-colors"
+              >
+                Tenes un club?
+              </Link>
+            </div>
+          </div>
         </div>
       </main>
     </div>

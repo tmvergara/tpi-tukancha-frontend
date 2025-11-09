@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import {
+  IconBallFootball,
+  IconCalendar,
   IconCamera,
   IconChartBar,
   IconDashboard,
@@ -13,6 +15,9 @@ import {
   IconHelp,
   IconInnerShadowTop,
   IconListDetails,
+  IconMoneybag,
+  IconMoneybagPlus,
+  IconPodium,
   IconReport,
   IconSearch,
   IconSettings,
@@ -31,6 +36,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Calendar, Icon, Settings } from "lucide-react";
 
 const data = {
   user: {
@@ -40,74 +46,86 @@ const data = {
   },
   navMain: [
     {
-      title: "Dashboard",
+      title: "Canchas",
       url: "#",
-      icon: IconDashboard,
+      icon: IconBallFootball,
+      isActive: true,
+      items: [
+        {
+          title: "History",
+          url: "#",
+        },
+        {
+          title: "Starred",
+          url: "#",
+        },
+        {
+          title: "Settings",
+          url: "#",
+        },
+      ],
     },
     {
-      title: "Lifecycle",
+      title: "Reservas",
       url: "#",
-      icon: IconListDetails,
+      icon: IconCalendar,
+      items: [
+        {
+          title: "Genesis",
+          url: "#",
+        },
+        {
+          title: "Explorer",
+          url: "#",
+        },
+        {
+          title: "Quantum",
+          url: "#",
+        },
+      ],
     },
     {
-      title: "Analytics",
+      title: "Torneos",
+      url: "#",
+      icon: IconPodium,
+      items: [
+        {
+          title: "Introduction",
+          url: "#",
+        },
+        {
+          title: "Get Started",
+          url: "#",
+        },
+        {
+          title: "Tutorials",
+          url: "#",
+        },
+        {
+          title: "Changelog",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Reportes",
       url: "#",
       icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "General",
           url: "#",
         },
         {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
+          title: "Team",
           url: "#",
         },
         {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
+          title: "Billing",
           url: "#",
         },
         {
-          title: "Archived",
+          title: "Limits",
           url: "#",
         },
       ],
@@ -115,14 +133,14 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Settings",
+      title: "Ajustes del Club",
       url: "#",
       icon: IconSettings,
     },
     {
-      title: "Get Help",
+      title: "Gestion de Precios",
       url: "#",
-      icon: IconHelp,
+      icon: IconMoneybagPlus,
     },
     {
       title: "Search",
