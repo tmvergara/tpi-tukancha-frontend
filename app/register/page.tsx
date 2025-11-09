@@ -1,5 +1,6 @@
 "use client";
 
+import { SignupForm } from "@/components/register-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -26,37 +27,13 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <form onSubmit={onSubmit} className="w-full max-w-sm p-6 rounded shadow">
-        <h2 className="text-2xl mb-4">Crear cuenta</h2>
-        {error && <div className="text-red-600 mb-2">{error}</div>}
-        <label className="block mb-2">
-          <span>Email</span>
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 block w-full"
-            type="email"
-            required
-          />
-        </label>
-        <label className="block mb-4">
-          <span>Contraseña</span>
-          <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full"
-            type="password"
-            required
-          />
-        </label>
-        <button
-          className="w-full rounded bg-foreground text-background py-2"
-          type="submit"
-        >
-          Registrarse
-        </button>
-      </form>
+    <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+      <div className="flex w-full max-w-lg flex-col gap-6">
+        <a href="#" className="flex items-center gap-2 self-center font-medium">
+          <img src="Logo1.png" alt="" className="h-16" />
+        </a>
+        <SignupForm />
+      </div>
     </div>
   );
 }
