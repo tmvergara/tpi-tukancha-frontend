@@ -258,6 +258,9 @@ export default function ReservasPage() {
   const [disponibilidad, setDisponibilidad] =
     React.useState<DisponibilidadResponse | null>(null);
   const [isLoadingSlots, setIsLoadingSlots] = React.useState(false);
+  const [selectedClubData, setSelectedClubData] = React.useState<Club | null>(
+    null
+  );
 
   // Estado para el dialog de selección de cancha
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -322,6 +325,39 @@ export default function ReservasPage() {
       setSelectedHorario(null);
     }
   }, [selectedClub, date]);
+
+  // Actualizar el club seleccionado cuando cambia
+  React.useEffect(() => {
+    if (selectedClub) {
+      const club = clubs.find((c) => c.id.toString() === selectedClub);
+      setSelectedClubData(club || null);
+    } else {
+      setSelectedClubData(null);
+    }
+  }, [selectedClub, clubs]);
+
+  // Función para verificar si un día está disponible
+  const isDayAvailable = (day: Date): boolean => {
+    if (!selectedClubData || !selectedClubData.horarios) return false;
+    if (selectedClubData.horarios.length === 0) return false;
+
+    const diasSemana = [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+    ];
+    const nombreDia = diasSemana[day.getDay()];
+
+    const horarioDelDia = selectedClubData.horarios.find(
+      (h) => h.dia === nombreDia
+    );
+
+    return horarioDelDia?.activo || false;
+  };
 
   const handlePreviousDay = () => {
     if (date) {
@@ -394,7 +430,7 @@ export default function ReservasPage() {
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 font-sans dark:bg-zinc-950">
       {/* Header - igual que el landing */}
-      <header className="sticky top-0 left-0 right-0 z-50 bg-white/100 backdrop-blur-md border-b border-zinc-200 dark:bg-black/80 dark:border-zinc-800">
+      <header className="sticky top-0 left-0 right-0 z-50 bg-white backdrop-blur-md border-b border-zinc-200 dark:bg-black/80 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
@@ -576,9 +612,18 @@ export default function ReservasPage() {
                   onSelect={setDate}
                   locale={es}
                   className="rounded-md border w-full"
-                  disabled={(date) =>
-                    date < new Date(new Date().setHours(0, 0, 0, 0))
-                  }
+                  disabled={(date) => {
+                    // Deshabilitar fechas pasadas
+                    if (date < new Date(new Date().setHours(0, 0, 0, 0))) {
+                      return true;
+                    }
+                    // Si hay un club seleccionado, verificar disponibilidad
+                    if (selectedClub) {
+                      return !isDayAvailable(date);
+                    }
+                    // Si no hay club seleccionado, no deshabilitar
+                    return false;
+                  }}
                 />
               </CardContent>
             </Card>

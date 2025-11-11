@@ -6,6 +6,14 @@ export interface User {
   club_id: number;
 }
 
+export interface Horario {
+  id: number;
+  dia: string;
+  abre: string;
+  cierra: string;
+  activo: boolean;
+}
+
 export interface Club {
   id: number;
   nombre: string;
@@ -18,4 +26,5 @@ export interface Club {
     provincia: string;
     pais: string;
   };
+  horarios: Horario[];
 }
