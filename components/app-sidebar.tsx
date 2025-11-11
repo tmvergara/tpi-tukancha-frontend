@@ -52,16 +52,12 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Ver canchas",
+          url: "/admin/canchas",
         },
         {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
+          title: "Crear cancha",
+          url: "/admin/canchas/crear",
         },
       ],
     },
@@ -71,16 +67,12 @@ const data = {
       icon: IconCalendar,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "Ver reservas",
+          url: "/admin/reservas",
         },
         {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
+          title: "Crear reserva manual",
+          url: "/admin/reservas/crear-manual",
         },
       ],
     },
@@ -90,20 +82,16 @@ const data = {
       icon: IconPodium,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "Ver torneos",
+          url: "/admin/torneos",
         },
         {
-          title: "Get Started",
-          url: "#",
+          title: "Crear torneo",
+          url: "/admin/torneos/crear",
         },
         {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
+          title: "Actualizar posiciones",
+          url: "/admin/torneos/actualizar-posiciones",
         },
       ],
     },
@@ -113,20 +101,20 @@ const data = {
       icon: IconChartBar,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "Reservas por cliente",
+          url: "/admin/reportes/reservas-por-cliente",
         },
         {
-          title: "Team",
-          url: "#",
+          title: "Reservas por cancha",
+          url: "/admin/reportes/reservas-por-cancha",
         },
         {
-          title: "Billing",
-          url: "#",
+          title: "Cancha mas utilizada",
+          url: "/admin/reportes/cancha-mas-utilizada",
         },
         {
-          title: "Limits",
-          url: "#",
+          title: "Utilizacion de canchas",
+          url: "/admin/reportes/utilizacion-de-canchas",
         },
       ],
     },
@@ -134,13 +122,8 @@ const data = {
   navSecondary: [
     {
       title: "Ajustes del Club",
-      url: "#",
+      url: "/admin/ajustes-club",
       icon: IconSettings,
-    },
-    {
-      title: "Gestion de Precios",
-      url: "#",
-      icon: IconMoneybagPlus,
     },
     {
       title: "Search",

@@ -17,6 +17,14 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,7 +78,7 @@ const registerSchema = z
   .object({
     // Paso 0: Datos básicos del club
     nombre: z.string().min(1, "El nombre del club es obligatorio"),
-    cuit: z.string().optional(),
+    cuit: z.string().min(1, "El CUIT es obligatorio"),
     telefono: z.string().min(1, "El teléfono es obligatorio"),
     email: z.string().email("Ingrese un correo electrónico válido"),
 
@@ -112,6 +120,11 @@ export function SignupForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [step, setStep] = useState(0);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [registeredData, setRegisteredData] = useState<{
+    clubName: string;
+    email: string;
+  } | null>(null);
 
   const {
     register,
@@ -182,8 +195,8 @@ export function SignupForm({
       process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
     try {
-      // 1. Crear el club
-      const clubPayload = {
+      // Consolidar todos los datos en un único payload
+      const payload = {
         nombre: data.nombre,
         cuit: data.cuit,
         telefono: data.telefono,
@@ -197,77 +210,39 @@ export function SignupForm({
           pais: data.pais,
           cp: data.cp,
         },
-      };
-
-      const clubResponse = await fetch(`${API_URL}/clubes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(clubPayload),
-      });
-
-      if (!clubResponse.ok) {
-        const errorData = await clubResponse.json();
-        throw new Error(errorData?.message || "Error al crear el club");
-      }
-
-      const clubData = await clubResponse.json();
-      const clubId = clubData.id || clubData._id || clubData.clubId;
-
-      if (!clubId) {
-        throw new Error("No se recibió el ID del club creado");
-      }
-
-      // 2. Agregar horarios al club
-      const horariosPayload = {
-        clubId: clubId,
         horarios: data.horarios
           .filter((h) => h.activo)
           .map((h) => ({
             dia: h.dia,
-            abre: h.abre,
-            cierra: h.cierra,
+            // Asegurar formato HH:MM (sin segundos)
+            abre: h.abre.substring(0, 5),
+            cierra: h.cierra.substring(0, 5),
           })),
+        usuario: {
+          nombre: "admin",
+          email: data.email,
+          password: data.password,
+          rol: "admin",
+        },
       };
 
-      const horariosResponse = await fetch(
-        `${API_URL}/clubes/${clubId}/horarios`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(horariosPayload),
-        }
-      );
-
-      if (!horariosResponse.ok) {
-        const errorData = await horariosResponse.json();
-        throw new Error(errorData?.message || "Error al agregar horarios");
-      }
-
-      // 3. Crear usuario admin asociado al club
-      const userPayload = {
-        nombre: "admin",
-        email: data.email,
-        password: data.password,
-        clubId: clubId,
-        rol: "admin",
-      };
-
-      const userResponse = await fetch(`${API_URL}/usuarios`, {
+      const response = await fetch(`${API_URL}/clubes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userPayload),
+        body: JSON.stringify(payload),
       });
 
-      if (!userResponse.ok) {
-        const errorData = await userResponse.json();
-        throw new Error(
-          errorData?.message || "Error al crear usuario administrador"
-        );
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData?.message || "Error al registrar el club");
       }
 
-      // Registro exitoso - redirigir al login o admin
-      alert("¡Registro exitoso! Redirigiendo...");
-      window.location.href = "/login";
+      // Registro exitoso - mostrar dialog de confirmación
+      setRegisteredData({
+        clubName: data.nombre,
+        email: data.email,
+      });
+      setShowSuccessDialog(true);
     } catch (err) {
       console.error("Error en el proceso de registro:", err);
       alert(
@@ -294,35 +269,62 @@ export function SignupForm({
                 // Datos básicos
                 <>
                   <Field>
-                    <FieldLabel htmlFor="nombre">Nombre del club</FieldLabel>
-                    <Input id="nombre" {...register("nombre")} />
+                    <FieldLabel htmlFor="nombre">
+                      Nombre del club <span className="text-red-600">*</span>
+                    </FieldLabel>
+                    <Input
+                      id="nombre"
+                      placeholder="Ej: Club Deportivo San Martín"
+                      {...register("nombre")}
+                    />
                     {errors.nombre && (
                       <FieldDescription className="text-red-600">
                         {errors.nombre.message}
                       </FieldDescription>
                     )}
                   </Field>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field>
+                      <FieldLabel htmlFor="cuit">
+                        CUIT <span className="text-red-600">*</span>
+                      </FieldLabel>
+                      <Input
+                        id="cuit"
+                        placeholder="20-12345678-9"
+                        {...register("cuit")}
+                      />
+                      {errors.cuit && (
+                        <FieldDescription className="text-red-600">
+                          {errors.cuit.message}
+                        </FieldDescription>
+                      )}
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="telefono">
+                        Teléfono <span className="text-red-600">*</span>
+                      </FieldLabel>
+                      <Input
+                        id="telefono"
+                        placeholder="+54 9 11 1234-5678"
+                        {...register("telefono")}
+                      />
+                      {errors.telefono && (
+                        <FieldDescription className="text-red-600">
+                          {errors.telefono.message}
+                        </FieldDescription>
+                      )}
+                    </Field>
+                  </div>
                   <Field>
-                    <FieldLabel htmlFor="cuit">CUIT</FieldLabel>
-                    <Input id="cuit" {...register("cuit")} />
-                    {errors.cuit && (
-                      <FieldDescription className="text-red-600">
-                        {errors.cuit.message}
-                      </FieldDescription>
-                    )}
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="telefono">Teléfono</FieldLabel>
-                    <Input id="telefono" {...register("telefono")} />
-                    {errors.telefono && (
-                      <FieldDescription className="text-red-600">
-                        {errors.telefono.message}
-                      </FieldDescription>
-                    )}
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
-                    <Input id="email" type="email" {...register("email")} />
+                    <FieldLabel htmlFor="email">
+                      Correo electrónico <span className="text-red-600">*</span>
+                    </FieldLabel>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="admin@miclub.com"
+                      {...register("email")}
+                    />
                     {errors.email && (
                       <FieldDescription className="text-red-600">
                         {errors.email.message}
@@ -336,18 +338,30 @@ export function SignupForm({
                 // Dirección
                 <>
                   <Field>
-                    <FieldLabel htmlFor="calle">Calle</FieldLabel>
-                    <Input id="calle" {...register("calle")} />
+                    <FieldLabel htmlFor="calle">
+                      Calle <span className="text-red-600">*</span>
+                    </FieldLabel>
+                    <Input
+                      id="calle"
+                      placeholder="Av. Corrientes"
+                      {...register("calle")}
+                    />
                     {errors.calle && (
                       <FieldDescription className="text-red-600">
                         {errors.calle.message}
                       </FieldDescription>
                     )}
                   </Field>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     <Field>
-                      <FieldLabel htmlFor="numero">Número</FieldLabel>
-                      <Input id="numero" {...register("numero")} />
+                      <FieldLabel htmlFor="numero">
+                        Número <span className="text-red-600">*</span>
+                      </FieldLabel>
+                      <Input
+                        id="numero"
+                        placeholder="1234"
+                        {...register("numero")}
+                      />
                       {errors.numero && (
                         <FieldDescription className="text-red-600">
                           {errors.numero.message}
@@ -356,47 +370,69 @@ export function SignupForm({
                     </Field>
                     <Field>
                       <FieldLabel htmlFor="piso">Piso</FieldLabel>
-                      <Input id="piso" {...register("piso")} />
+                      <Input id="piso" placeholder="5" {...register("piso")} />
                       {errors.piso && (
                         <FieldDescription className="text-red-600">
                           {errors.piso.message}
                         </FieldDescription>
                       )}
                     </Field>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
                     <Field>
                       <FieldLabel htmlFor="depto">Depto</FieldLabel>
-                      <Input id="depto" {...register("depto")} />
+                      <Input
+                        id="depto"
+                        placeholder="B"
+                        {...register("depto")}
+                      />
                       {errors.depto && (
                         <FieldDescription className="text-red-600">
                           {errors.depto.message}
                         </FieldDescription>
                       )}
                     </Field>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
                     <Field>
-                      <FieldLabel htmlFor="ciudad">Ciudad</FieldLabel>
-                      <Input id="ciudad" {...register("ciudad")} />
+                      <FieldLabel htmlFor="ciudad">
+                        Ciudad <span className="text-red-600">*</span>
+                      </FieldLabel>
+                      <Input
+                        id="ciudad"
+                        placeholder="Buenos Aires"
+                        {...register("ciudad")}
+                      />
                       {errors.ciudad && (
                         <FieldDescription className="text-red-600">
                           {errors.ciudad.message}
                         </FieldDescription>
                       )}
                     </Field>
+                    <Field>
+                      <FieldLabel htmlFor="provincia">
+                        Provincia <span className="text-red-600">*</span>
+                      </FieldLabel>
+                      <Input
+                        id="provincia"
+                        placeholder="Buenos Aires"
+                        {...register("provincia")}
+                      />
+                      {errors.provincia && (
+                        <FieldDescription className="text-red-600">
+                          {errors.provincia.message}
+                        </FieldDescription>
+                      )}
+                    </Field>
                   </div>
-                  <Field>
-                    <FieldLabel htmlFor="provincia">Provincia</FieldLabel>
-                    <Input id="provincia" {...register("provincia")} />
-                    {errors.provincia && (
-                      <FieldDescription className="text-red-600">
-                        {errors.provincia.message}
-                      </FieldDescription>
-                    )}
-                  </Field>
                   <div className="grid grid-cols-2 gap-4">
                     <Field>
-                      <FieldLabel htmlFor="pais">País</FieldLabel>
-                      <Input id="pais" {...register("pais")} />
+                      <FieldLabel htmlFor="pais">
+                        País <span className="text-red-600">*</span>
+                      </FieldLabel>
+                      <Input
+                        id="pais"
+                        placeholder="Argentina"
+                        {...register("pais")}
+                      />
                       {errors.pais && (
                         <FieldDescription className="text-red-600">
                           {errors.pais.message}
@@ -404,8 +440,10 @@ export function SignupForm({
                       )}
                     </Field>
                     <Field>
-                      <FieldLabel htmlFor="cp">Código Postal</FieldLabel>
-                      <Input id="cp" {...register("cp")} />
+                      <FieldLabel htmlFor="cp">
+                        Código Postal <span className="text-red-600">*</span>
+                      </FieldLabel>
+                      <Input id="cp" placeholder="C1043" {...register("cp")} />
                       {errors.cp && (
                         <FieldDescription className="text-red-600">
                           {errors.cp.message}
@@ -443,7 +481,6 @@ export function SignupForm({
                             render={({ field }) => (
                               <Input
                                 type="time"
-                                step={"1"}
                                 {...field}
                                 className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none h-12"
                               />
@@ -456,7 +493,6 @@ export function SignupForm({
                             render={({ field }) => (
                               <Input
                                 type="time"
-                                step={"1"}
                                 {...field}
                                 className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none h-12"
                               />
@@ -495,10 +531,13 @@ export function SignupForm({
                 // Password
                 <>
                   <Field>
-                    <FieldLabel htmlFor="password">Contraseña</FieldLabel>
+                    <FieldLabel htmlFor="password">
+                      Contraseña <span className="text-red-600">*</span>
+                    </FieldLabel>
                     <Input
                       id="password"
                       type="password"
+                      placeholder="Mínimo 8 caracteres"
                       {...register("password")}
                     />
                     {errors.password && (
@@ -509,11 +548,13 @@ export function SignupForm({
                   </Field>
                   <Field>
                     <FieldLabel htmlFor="confirm-password">
-                      Confirmar contraseña
+                      Confirmar contraseña{" "}
+                      <span className="text-red-600">*</span>
                     </FieldLabel>
                     <Input
                       id="confirm-password"
                       type="password"
+                      placeholder="Repite tu contraseña"
                       {...register("confirmPassword")}
                     />
                     {errors.confirmPassword && (
@@ -554,6 +595,44 @@ export function SignupForm({
         Al hacer clic en registrar aceptas nuestros <a href="#">Términos</a> y
         la <a href="#">Política de privacidad</a>.
       </FieldDescription>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¡Registro exitoso! 🎉</DialogTitle>
+            <DialogDescription>
+              Tu club ha sido registrado correctamente.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-4">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Club registrado:
+              </p>
+              <p className="text-base font-semibold">
+                {registeredData?.clubName}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Usuario administrador:
+              </p>
+              <p className="text-base font-semibold">{registeredData?.email}</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setShowSuccessDialog(false);
+                window.location.href = "/login";
+              }}
+              className="w-full sm:w-auto"
+            >
+              Iniciar sesión
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
