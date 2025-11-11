@@ -1,3 +1,11 @@
+export interface User {
+  id: number;
+  nombre: string;
+  email: string;
+  rol: "admin" | "socio";
+  club_id: number;
+}
+
 export interface Club {
   id: number;
   nombre: string;

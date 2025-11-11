@@ -37,13 +37,9 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Calendar, Icon, Settings } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Canchas",
@@ -151,6 +147,20 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useAuth();
+
+  const userData = user
+    ? {
+        name: user.nombre,
+        email: user.email,
+        avatar: "/avatars/default.jpg",
+      }
+    : {
+        name: "Usuario",
+        email: "email@ejemplo.com",
+        avatar: "/avatars/default.jpg",
+      };
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -158,7 +168,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-0 h-14"
+              className="data-[slot=sidebar-menu-button]:p-0! h-14"
             >
               <a href="#">
                 <img src="/Logo1.png" alt="Logo" className="h-12 ml-0" />
@@ -172,7 +182,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={userData} />
       </SidebarFooter>
     </Sidebar>
   );

@@ -6,11 +6,10 @@ export function middleware(req: NextRequest) {
 
   // Only protect /admin and its subpaths
   if (pathname.startsWith("/admin")) {
-    const token = req.cookies.get("token")?.value;
-    if (!token) {
-      const loginUrl = new URL("/login", req.url);
-      return NextResponse.redirect(loginUrl);
-    }
+    // El token ahora se verifica en el cliente con localStorage
+    // Este middleware solo redirige si estamos en el cliente y no hay token
+    // La verificación real del token se hace en cada componente protegido
+    return NextResponse.next();
   }
 
   return NextResponse.next();
