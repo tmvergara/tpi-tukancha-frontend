@@ -28,3 +28,54 @@ export interface Club {
   };
   horarios: Horario[];
 }
+
+// Tipos para disponibilidad de canchas
+export interface Cancha {
+  timeslot_id: number;
+  cancha_id: number;
+  nombre: string;
+  deporte: string;
+  techado: boolean;
+  iluminacion: boolean;
+  superficie: number;
+  precio: number;
+  hora_inicio: string;
+  hora_fin: string;
+}
+
+export interface HorarioDisponibilidad {
+  hora: string;
+  total_disponibles: number;
+  canchas_disponibles: Cancha[];
+}
+
+export interface DisponibilidadResponse {
+  club_id: number;
+  fecha: string;
+  horarios: HorarioDisponibilidad[];
+}
+
+// Tipo para la respuesta de creación de reserva
+export interface ReservaResponse {
+  id: number;
+  cancha: {
+    id: number;
+    nombre: string;
+    deporte: string;
+    superficie: number;
+    techado: boolean;
+    iluminacion: boolean;
+    precio_hora: number;
+    club_id: number;
+    activa: boolean;
+  };
+  cliente_nombre: string;
+  cliente_telefono: string;
+  cliente_email: string;
+  estado: string;
+  fuente: string;
+  servicios: string;
+  precio_total: number;
+  created_at: string;
+  updated_at: string;
+}

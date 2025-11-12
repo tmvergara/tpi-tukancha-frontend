@@ -8,7 +8,13 @@ import { es } from "date-fns/locale";
 
 import { cn } from "@/lib/utils";
 import { API_URL } from "@/lib/config";
-import { Club } from "@/lib/types";
+import {
+  Club,
+  Cancha,
+  HorarioDisponibilidad,
+  DisponibilidadResponse,
+  ReservaResponse,
+} from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -52,57 +58,6 @@ const SERVICIOS_DISPONIBLES = [
   "Estacionamiento",
   "Duchas",
 ];
-
-// Tipos para la disponibilidad
-interface Cancha {
-  timeslot_id: number;
-  cancha_id: number;
-  nombre: string;
-  deporte: string;
-  techado: boolean;
-  iluminacion: boolean;
-  superficie: number;
-  precio: number;
-  hora_inicio: string;
-  hora_fin: string;
-}
-
-interface HorarioDisponibilidad {
-  hora: string;
-  total_disponibles: number;
-  canchas_disponibles: Cancha[];
-}
-
-interface DisponibilidadResponse {
-  club_id: number;
-  fecha: string;
-  horarios: HorarioDisponibilidad[];
-}
-
-// Tipo para la respuesta de creación de reserva
-interface ReservaResponse {
-  id: number;
-  cancha: {
-    id: number;
-    nombre: string;
-    deporte: string;
-    superficie: number;
-    techado: boolean;
-    iluminacion: boolean;
-    precio_hora: number;
-    club_id: number;
-    activa: boolean;
-  };
-  cliente_nombre: string;
-  cliente_telefono: string;
-  cliente_email: string;
-  estado: string;
-  fuente: string;
-  servicios: string;
-  precio_total: number;
-  created_at: string;
-  updated_at: string;
-}
 
 export default function ReservasPage() {
   const [open, setOpen] = React.useState(false);
@@ -322,18 +277,18 @@ export default function ReservasPage() {
       }
 
       const data: ReservaResponse = await response.json();
-      
+
       // Guardar la reserva creada y mostrar dialog de éxito
       setReservaCreada(data);
       setDialogOpen(false);
       setSuccessDialogOpen(true);
-      
+
       // Limpiar formulario
       setFormData({ nombre: "", telefono: "", email: "" });
       setSelectedServicios([]);
       setSelectedCancha(null);
       setSelectedHorario(null);
-      
+
       // Refrescar disponibilidad
       if (selectedClub && date && isDayAvailable(date)) {
         const fechaFormateada = format(date, "yyyy-MM-dd");
@@ -866,7 +821,9 @@ export default function ReservasPage() {
                     isCreatingReserva
                   }
                 >
-                  {isCreatingReserva ? "Creando reserva..." : "Confirmar reserva"}
+                  {isCreatingReserva
+                    ? "Creando reserva..."
+                    : "Confirmar reserva"}
                 </Button>
               </div>
             </div>
@@ -909,7 +866,7 @@ export default function ReservasPage() {
                   <h4 className="font-semibold text-sm text-zinc-700 dark:text-zinc-300 mb-2">
                     Detalles de la reserva
                   </h4>
-                  
+
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-zinc-600 dark:text-zinc-400">
@@ -919,7 +876,7 @@ export default function ReservasPage() {
                         {reservaCreada.cliente_nombre}
                       </span>
                     </div>
-                    
+
                     <div className="flex justify-between">
                       <span className="text-zinc-600 dark:text-zinc-400">
                         Email:
@@ -928,7 +885,7 @@ export default function ReservasPage() {
                         {reservaCreada.cliente_email}
                       </span>
                     </div>
-                    
+
                     <div className="flex justify-between">
                       <span className="text-zinc-600 dark:text-zinc-400">
                         Teléfono:
@@ -947,7 +904,7 @@ export default function ReservasPage() {
                           {reservaCreada.cancha.nombre}
                         </span>
                       </div>
-                      
+
                       <div className="flex justify-between mt-1">
                         <span className="text-zinc-600 dark:text-zinc-400">
                           Deporte:
