@@ -41,212 +41,68 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+
+// Servicios disponibles
+const SERVICIOS_DISPONIBLES = [
+  "Parrilla",
+  "Bebidas",
+  "Pelota",
+  "Vestuarios",
+  "Estacionamiento",
+  "Duchas",
+];
 
 // Tipos para la disponibilidad
 interface Cancha {
-  id: number;
+  timeslot_id: number;
+  cancha_id: number;
   nombre: string;
-  tipo: string;
-  techada: boolean;
+  deporte: string;
+  techado: boolean;
+  iluminacion: boolean;
+  superficie: number;
   precio: number;
-  caracteristicas?: string[];
+  hora_inicio: string;
+  hora_fin: string;
 }
 
 interface HorarioDisponibilidad {
   hora: string;
-  canchasDisponibles: Cancha[];
+  total_disponibles: number;
+  canchas_disponibles: Cancha[];
 }
 
 interface DisponibilidadResponse {
+  club_id: number;
   fecha: string;
   horarios: HorarioDisponibilidad[];
 }
 
-// Mock data de disponibilidad
-const mockDisponibilidad: DisponibilidadResponse = {
-  fecha: "2025-11-09",
-  horarios: [
-    {
-      hora: "08:00",
-      canchasDisponibles: [
-        {
-          id: 1,
-          nombre: "Cancha 1",
-          tipo: "Fútbol 5",
-          techada: true,
-          precio: 5000,
-          caracteristicas: ["Césped sintético", "Iluminación LED"],
-        },
-        {
-          id: 2,
-          nombre: "Cancha 2",
-          tipo: "Fútbol 7",
-          techada: false,
-          precio: 7000,
-          caracteristicas: ["Césped natural"],
-        },
-      ],
-    },
-    {
-      hora: "09:00",
-      canchasDisponibles: [
-        {
-          id: 1,
-          nombre: "Cancha 1",
-          tipo: "Fútbol 5",
-          techada: true,
-          precio: 5000,
-          caracteristicas: ["Césped sintético", "Iluminación LED"],
-        },
-      ],
-    },
-    {
-      hora: "10:00",
-      canchasDisponibles: [],
-    },
-    {
-      hora: "11:00",
-      canchasDisponibles: [
-        {
-          id: 3,
-          nombre: "Cancha 3",
-          tipo: "Paddle",
-          techada: true,
-          precio: 4000,
-          caracteristicas: ["Piso de cemento"],
-        },
-      ],
-    },
-    {
-      hora: "12:00",
-      canchasDisponibles: [
-        {
-          id: 1,
-          nombre: "Cancha 1",
-          tipo: "Fútbol 5",
-          techada: true,
-          precio: 5000,
-        },
-        {
-          id: 2,
-          nombre: "Cancha 2",
-          tipo: "Fútbol 7",
-          techada: false,
-          precio: 7000,
-        },
-      ],
-    },
-    {
-      hora: "13:00",
-      canchasDisponibles: [
-        {
-          id: 2,
-          nombre: "Cancha 2",
-          tipo: "Fútbol 7",
-          techada: false,
-          precio: 7000,
-        },
-      ],
-    },
-    {
-      hora: "14:00",
-      canchasDisponibles: [],
-    },
-    {
-      hora: "15:00",
-      canchasDisponibles: [
-        {
-          id: 1,
-          nombre: "Cancha 1",
-          tipo: "Fútbol 5",
-          techada: true,
-          precio: 5000,
-          caracteristicas: ["Césped sintético", "Iluminación LED"],
-        },
-        {
-          id: 2,
-          nombre: "Cancha 2",
-          tipo: "Fútbol 7",
-          techada: false,
-          precio: 7000,
-          caracteristicas: ["Césped natural"],
-        },
-        {
-          id: 3,
-          nombre: "Cancha 3",
-          tipo: "Paddle",
-          techada: true,
-          precio: 4000,
-          caracteristicas: ["Piso de cemento"],
-        },
-      ],
-    },
-    {
-      hora: "16:00",
-      canchasDisponibles: [
-        {
-          id: 1,
-          nombre: "Cancha 1",
-          tipo: "Fútbol 5",
-          techada: true,
-          precio: 5000,
-        },
-      ],
-    },
-    {
-      hora: "17:00",
-      canchasDisponibles: [
-        {
-          id: 2,
-          nombre: "Cancha 2",
-          tipo: "Fútbol 7",
-          techada: false,
-          precio: 7000,
-        },
-      ],
-    },
-    {
-      hora: "18:00",
-      canchasDisponibles: [],
-    },
-    {
-      hora: "19:00",
-      canchasDisponibles: [
-        {
-          id: 1,
-          nombre: "Cancha 1",
-          tipo: "Fútbol 5",
-          techada: true,
-          precio: 5000,
-        },
-      ],
-    },
-    {
-      hora: "20:00",
-      canchasDisponibles: [
-        {
-          id: 3,
-          nombre: "Cancha 3",
-          tipo: "Paddle",
-          techada: true,
-          precio: 4000,
-        },
-      ],
-    },
-    {
-      hora: "21:00",
-      canchasDisponibles: [
-        {
-          id: 2,
-          nombre: "Cancha 2",
-          tipo: "Fútbol 7",
-          techada: false,
-          precio: 7000,
-        },
-      ],
-    },
-  ],
-};
+// Tipo para la respuesta de creación de reserva
+interface ReservaResponse {
+  id: number;
+  cancha: {
+    id: number;
+    nombre: string;
+    deporte: string;
+    superficie: number;
+    techado: boolean;
+    iluminacion: boolean;
+    precio_hora: number;
+    club_id: number;
+    activa: boolean;
+  };
+  cliente_nombre: string;
+  cliente_telefono: string;
+  cliente_email: string;
+  estado: string;
+  fuente: string;
+  servicios: string;
+  precio_total: number;
+  created_at: string;
+  updated_at: string;
+}
 
 export default function ReservasPage() {
   const [open, setOpen] = React.useState(false);
@@ -270,12 +126,21 @@ export default function ReservasPage() {
     null
   );
 
+  // Estado para el dialog de confirmación exitosa
+  const [successDialogOpen, setSuccessDialogOpen] = React.useState(false);
+  const [reservaCreada, setReservaCreada] =
+    React.useState<ReservaResponse | null>(null);
+  const [isCreatingReserva, setIsCreatingReserva] = React.useState(false);
+
   // Estado del formulario de reserva
   const [formData, setFormData] = React.useState({
     nombre: "",
     telefono: "",
     email: "",
   });
+  const [selectedServicios, setSelectedServicios] = React.useState<string[]>(
+    []
+  );
 
   // Fetch clubes del backend
   React.useEffect(() => {
@@ -299,33 +164,6 @@ export default function ReservasPage() {
     fetchClubs();
   }, []);
 
-  // Fetch timeslots cuando cambia el club o la fecha
-  React.useEffect(() => {
-    if (selectedClub && date) {
-      // TODO: Reemplazar con llamada real al backend
-      // const fetchDisponibilidad = async () => {
-      //   try {
-      //     setIsLoadingSlots(true);
-      //     const response = await fetch(
-      //       `${API_URL}/clubes/${selectedClub}/disponibilidad?fecha=${format(date, 'yyyy-MM-dd')}`
-      //     );
-      //     const data = await response.json();
-      //     setDisponibilidad(data);
-      //   } catch (error) {
-      //     console.error("Error fetching disponibilidad:", error);
-      //   } finally {
-      //     setIsLoadingSlots(false);
-      //   }
-      // };
-      // fetchDisponibilidad();
-
-      // Por ahora usamos mock data
-      setDisponibilidad(mockDisponibilidad);
-      setSelectedCancha(null);
-      setSelectedHorario(null);
-    }
-  }, [selectedClub, date]);
-
   // Actualizar el club seleccionado cuando cambia
   React.useEffect(() => {
     if (selectedClub) {
@@ -337,27 +175,72 @@ export default function ReservasPage() {
   }, [selectedClub, clubs]);
 
   // Función para verificar si un día está disponible
-  const isDayAvailable = (day: Date): boolean => {
-    if (!selectedClubData || !selectedClubData.horarios) return false;
-    if (selectedClubData.horarios.length === 0) return false;
+  const isDayAvailable = React.useCallback(
+    (day: Date): boolean => {
+      if (!selectedClubData || !selectedClubData.horarios) return false;
+      if (selectedClubData.horarios.length === 0) return false;
 
-    const diasSemana = [
-      "Domingo",
-      "Lunes",
-      "Martes",
-      "Miércoles",
-      "Jueves",
-      "Viernes",
-      "Sábado",
-    ];
-    const nombreDia = diasSemana[day.getDay()];
+      const diasSemana = [
+        "Domingo",
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
+      ];
+      const nombreDia = diasSemana[day.getDay()];
 
-    const horarioDelDia = selectedClubData.horarios.find(
-      (h) => h.dia === nombreDia
-    );
+      const horarioDelDia = selectedClubData.horarios.find(
+        (h) => h.dia === nombreDia
+      );
 
-    return horarioDelDia?.activo || false;
-  };
+      return horarioDelDia?.activo || false;
+    },
+    [selectedClubData]
+  );
+
+  // Fetch timeslots cuando cambia el club o la fecha
+  React.useEffect(() => {
+    if (selectedClub && date) {
+      // Verificar que el día seleccionado sea válido (club abierto)
+      if (!isDayAvailable(date)) {
+        setDisponibilidad(null);
+        setSelectedCancha(null);
+        setSelectedHorario(null);
+        return;
+      }
+
+      const fetchDisponibilidad = async () => {
+        try {
+          setIsLoadingSlots(true);
+          const fechaFormateada = format(date, "yyyy-MM-dd");
+          const response = await fetch(
+            `${API_URL}/timeslots/disponibilidad?club_id=${selectedClub}&fecha=${fechaFormateada}`
+          );
+          if (!response.ok) {
+            throw new Error("Error al cargar la disponibilidad");
+          }
+          const data = await response.json();
+          setDisponibilidad(data);
+        } catch (error) {
+          console.error("Error fetching disponibilidad:", error);
+          setDisponibilidad(null);
+        } finally {
+          setIsLoadingSlots(false);
+        }
+      };
+
+      fetchDisponibilidad();
+      setSelectedCancha(null);
+      setSelectedHorario(null);
+    } else {
+      // Si no hay club o fecha, limpiar disponibilidad
+      setDisponibilidad(null);
+      setSelectedCancha(null);
+      setSelectedHorario(null);
+    }
+  }, [selectedClub, date, isDayAvailable]);
 
   const handlePreviousDay = () => {
     if (date) {
@@ -376,7 +259,7 @@ export default function ReservasPage() {
   };
 
   const handleHorarioClick = (horario: HorarioDisponibilidad) => {
-    if (horario.canchasDisponibles.length > 0) {
+    if (horario.canchas_disponibles.length > 0) {
       setSelectedHorario(horario);
       setDialogOpen(true);
     }
@@ -393,38 +276,81 @@ export default function ReservasPage() {
     }));
   };
 
+  const handleServicioToggle = (servicio: string) => {
+    setSelectedServicios((prev) =>
+      prev.includes(servicio)
+        ? prev.filter((s) => s !== servicio)
+        : [...prev, servicio]
+    );
+  };
+
+  // Generar código de reserva: IDclub+NombreClub+IdReserva
+  const getCodigoReserva = (reserva: ReservaResponse): string => {
+    const clubData = clubs.find((c) => c.id === reserva.cancha.club_id);
+    const nombreClubLimpio = clubData?.nombre.replace(/\s+/g, "") || "CLUB";
+    return `${reserva.cancha.club_id}${nombreClubLimpio}${reserva.id}`;
+  };
+
   const handleConfirmReserva = async () => {
     if (!selectedCancha || !selectedHorario || !selectedClub || !date) return;
 
-    // TODO: Implementar llamada al backend
+    // Validar que los servicios no estén vacíos
+    if (selectedServicios.length === 0) {
+      alert("Por favor seleccioná al menos un servicio");
+      return;
+    }
+
     const reservaData = {
-      clubId: selectedClub,
-      canchaId: selectedCancha.id,
-      fecha: format(date, "yyyy-MM-dd"),
-      horaInicio: selectedHorario.hora,
-      clienteNombre: formData.nombre,
-      clienteTelefono: formData.telefono,
-      clienteEmail: formData.email,
+      timeslot_ids: [selectedCancha.timeslot_id],
+      cliente_nombre: formData.nombre,
+      cliente_telefono: formData.telefono,
+      cliente_email: formData.email,
+      fuente: "WEB",
+      servicios: selectedServicios.join(", "),
     };
 
-    console.log("Reserva a crear:", reservaData);
+    try {
+      setIsCreatingReserva(true);
+      const response = await fetch(`${API_URL}/reservas`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reservaData),
+      });
 
-    // const response = await fetch(`${API_URL}/reservas`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(reservaData),
-    // });
+      if (!response.ok) {
+        throw new Error("Error al crear la reserva");
+      }
 
-    // if (response.ok) {
-    //   // Mostrar mensaje de éxito y redirigir
-    //   alert('Reserva confirmada exitosamente!');
-    //   setDialogOpen(false);
-    //   // Actualizar disponibilidad
-    // }
-
-    alert("Reserva confirmada! (Mock)");
-    setDialogOpen(false);
-    setFormData({ nombre: "", telefono: "", email: "" });
+      const data: ReservaResponse = await response.json();
+      
+      // Guardar la reserva creada y mostrar dialog de éxito
+      setReservaCreada(data);
+      setDialogOpen(false);
+      setSuccessDialogOpen(true);
+      
+      // Limpiar formulario
+      setFormData({ nombre: "", telefono: "", email: "" });
+      setSelectedServicios([]);
+      setSelectedCancha(null);
+      setSelectedHorario(null);
+      
+      // Refrescar disponibilidad
+      if (selectedClub && date && isDayAvailable(date)) {
+        const fechaFormateada = format(date, "yyyy-MM-dd");
+        const dispResponse = await fetch(
+          `${API_URL}/timeslots/disponibilidad?club_id=${selectedClub}&fecha=${fechaFormateada}`
+        );
+        if (dispResponse.ok) {
+          const dispData = await dispResponse.json();
+          setDisponibilidad(dispData);
+        }
+      }
+    } catch (error) {
+      console.error("Error creating reserva:", error);
+      alert("Error al crear la reserva. Por favor intentá nuevamente.");
+    } finally {
+      setIsCreatingReserva(false);
+    }
   };
 
   return (
@@ -676,6 +602,10 @@ export default function ReservasPage() {
                   <div className="text-center py-12 text-zinc-500">
                     Seleccioná una fecha para ver los horarios
                   </div>
+                ) : !isDayAvailable(date) ? (
+                  <div className="text-center py-12 text-zinc-500">
+                    El club no está abierto en la fecha seleccionada
+                  </div>
                 ) : isLoadingSlots ? (
                   <div className="text-center py-12 text-zinc-500">
                     Cargando horarios...
@@ -688,7 +618,7 @@ export default function ReservasPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {disponibilidad.horarios.map((horario) => {
                       const hayDisponibilidad =
-                        horario.canchasDisponibles.length > 0;
+                        horario.canchas_disponibles.length > 0;
                       const isPast =
                         date.toDateString() === new Date().toDateString() &&
                         parseInt(horario.hora.split(":")[0]) <
@@ -709,8 +639,8 @@ export default function ReservasPage() {
                           <div>{horario.hora}</div>
                           {hayDisponibilidad && !isPast && (
                             <div className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                              {horario.canchasDisponibles.length}{" "}
-                              {horario.canchasDisponibles.length === 1
+                              {horario.canchas_disponibles.length}{" "}
+                              {horario.canchas_disponibles.length === 1
                                 ? "cancha"
                                 : "canchas"}
                             </div>
@@ -745,9 +675,9 @@ export default function ReservasPage() {
           {!selectedCancha ? (
             // Lista de canchas disponibles
             <div className="space-y-3 mt-4">
-              {selectedHorario?.canchasDisponibles.map((cancha) => (
+              {selectedHorario?.canchas_disponibles.map((cancha) => (
                 <Card
-                  key={cancha.id}
+                  key={cancha.timeslot_id}
                   className="cursor-pointer hover:border-[#FFBF2C] transition-colors"
                   onClick={() => handleCanchaSelect(cancha)}
                 >
@@ -758,22 +688,25 @@ export default function ReservasPage() {
                           {cancha.nombre}
                         </h3>
                         <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">
-                          {cancha.tipo}
+                          {cancha.deporte}
                         </p>
                         <div className="flex flex-wrap gap-2">
-                          {cancha.techada && (
+                          {cancha.techado && (
                             <Badge variant="secondary">Techada</Badge>
                           )}
-                          {cancha.caracteristicas?.map((car) => (
-                            <Badge key={car} variant="outline">
-                              {car}
-                            </Badge>
-                          ))}
+                          {cancha.iluminacion && (
+                            <Badge variant="outline">Iluminación</Badge>
+                          )}
+                          <Badge variant="outline">{cancha.superficie}m²</Badge>
                         </div>
                       </div>
                       <div className="text-right ml-4">
                         <p className="text-2xl font-bold text-[#FFBF2C]">
-                          ${cancha.precio.toLocaleString()}
+                          $
+                          {cancha.precio.toLocaleString("es-AR", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
                         </p>
                         <p className="text-xs text-zinc-500 dark:text-zinc-400">
                           por hora
@@ -797,7 +730,7 @@ export default function ReservasPage() {
                         Cancha:
                       </span>
                       <span className="font-medium">
-                        {selectedCancha.nombre} - {selectedCancha.tipo}
+                        {selectedCancha.nombre} - {selectedCancha.deporte}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -822,7 +755,11 @@ export default function ReservasPage() {
                     <div className="flex justify-between pt-2 border-t border-zinc-200 dark:border-zinc-700">
                       <span className="font-semibold">Total:</span>
                       <span className="text-xl font-bold text-[#FFBF2C]">
-                        ${selectedCancha.precio.toLocaleString()}
+                        $
+                        {selectedCancha.precio.toLocaleString("es-AR", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
                       </span>
                     </div>
                   </div>
@@ -868,13 +805,53 @@ export default function ReservasPage() {
                     required
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <Label>Servicios *</Label>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    Seleccioná los servicios que necesitás
+                  </p>
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    {SERVICIOS_DISPONIBLES.map((servicio) => (
+                      <div
+                        key={servicio}
+                        className="flex items-center space-x-2"
+                      >
+                        <Checkbox
+                          id={servicio}
+                          checked={selectedServicios.includes(servicio)}
+                          onCheckedChange={() => handleServicioToggle(servicio)}
+                        />
+                        <label
+                          htmlFor={servicio}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        >
+                          {servicio}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedServicios.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {selectedServicios.map((servicio) => (
+                        <Badge key={servicio} variant="secondary">
+                          {servicio}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Botones */}
               <div className="flex gap-3 justify-end pt-4">
                 <Button
                   variant="outline"
-                  onClick={() => setSelectedCancha(null)}
+                  onClick={() => {
+                    setSelectedCancha(null);
+                    setSelectedServicios([]);
+                  }}
+                  disabled={isCreatingReserva}
                 >
                   Volver
                 </Button>
@@ -882,12 +859,153 @@ export default function ReservasPage() {
                   className="bg-[#FFBF2C] hover:bg-[#FFBF2C]/90 text-zinc-900"
                   onClick={handleConfirmReserva}
                   disabled={
-                    !formData.nombre || !formData.telefono || !formData.email
+                    !formData.nombre ||
+                    !formData.telefono ||
+                    !formData.email ||
+                    selectedServicios.length === 0 ||
+                    isCreatingReserva
                   }
                 >
-                  Confirmar reserva
+                  {isCreatingReserva ? "Creando reserva..." : "Confirmar reserva"}
                 </Button>
               </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de confirmación exitosa */}
+      <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl">
+              ¡Reserva confirmada! ✓
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              Tu reserva ha sido creada exitosamente
+            </DialogDescription>
+          </DialogHeader>
+
+          {reservaCreada && (
+            <div className="space-y-4 mt-4">
+              {/* Código de reserva destacado */}
+              <Card className="bg-[#FFBF2C]/10 border-[#FFBF2C]">
+                <CardContent className="p-4 text-center">
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+                    Código de reserva
+                  </p>
+                  <p className="text-2xl font-bold text-[#FFBF2C] tracking-wider">
+                    {getCodigoReserva(reservaCreada)}
+                  </p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+                    Guardá este código para consultar tu reserva
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Detalles de la reserva */}
+              <Card>
+                <CardContent className="p-4 space-y-3">
+                  <h4 className="font-semibold text-sm text-zinc-700 dark:text-zinc-300 mb-2">
+                    Detalles de la reserva
+                  </h4>
+                  
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-zinc-600 dark:text-zinc-400">
+                        Cliente:
+                      </span>
+                      <span className="font-medium">
+                        {reservaCreada.cliente_nombre}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-zinc-600 dark:text-zinc-400">
+                        Email:
+                      </span>
+                      <span className="font-medium">
+                        {reservaCreada.cliente_email}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-zinc-600 dark:text-zinc-400">
+                        Teléfono:
+                      </span>
+                      <span className="font-medium">
+                        {reservaCreada.cliente_telefono}
+                      </span>
+                    </div>
+
+                    <div className="border-t pt-2 mt-2">
+                      <div className="flex justify-between">
+                        <span className="text-zinc-600 dark:text-zinc-400">
+                          Cancha:
+                        </span>
+                        <span className="font-medium">
+                          {reservaCreada.cancha.nombre}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between mt-1">
+                        <span className="text-zinc-600 dark:text-zinc-400">
+                          Deporte:
+                        </span>
+                        <span className="font-medium">
+                          {reservaCreada.cancha.deporte}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-2 mt-2">
+                      <div className="flex justify-between">
+                        <span className="text-zinc-600 dark:text-zinc-400">
+                          Servicios:
+                        </span>
+                        <span className="font-medium text-right max-w-[60%]">
+                          {reservaCreada.servicios}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-2 mt-2">
+                      <div className="flex justify-between">
+                        <span className="text-zinc-600 dark:text-zinc-400">
+                          Estado:
+                        </span>
+                        <Badge variant="secondary">
+                          {reservaCreada.estado}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-2 mt-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold">Precio total:</span>
+                        <span className="text-xl font-bold text-[#FFBF2C]">
+                          $
+                          {reservaCreada.precio_total.toLocaleString("es-AR", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Botón cerrar */}
+              <Button
+                className="w-full bg-[#FFBF2C] hover:bg-[#FFBF2C]/90 text-zinc-900"
+                onClick={() => {
+                  setSuccessDialogOpen(false);
+                  setReservaCreada(null);
+                }}
+              >
+                Cerrar
+              </Button>
             </div>
           )}
         </DialogContent>
