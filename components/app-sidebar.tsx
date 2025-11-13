@@ -4,24 +4,13 @@ import * as React from "react";
 import {
   IconBallFootball,
   IconCalendar,
-  IconCamera,
   IconChartBar,
-  IconDashboard,
   IconDatabase,
-  IconFileAi,
-  IconFileDescription,
   IconFileWord,
-  IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconMoneybag,
-  IconMoneybagPlus,
   IconPodium,
   IconReport,
   IconSearch,
   IconSettings,
-  IconUsers,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -36,8 +25,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Calendar, Icon, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { usePermissions } from "@/hooks/use-permissions";
 
 const data = {
   navMain: [
@@ -148,6 +137,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth();
+  const { can } = usePermissions();
 
   const userData = user
     ? {
@@ -160,6 +150,31 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         email: "email@ejemplo.com",
         avatar: "/avatars/default.jpg",
       };
+
+  // Filtrar elementos de navegación según permisos
+  const filteredNavMain = data.navMain.filter((item) => {
+    if (item.title === "Canchas") {
+      return can("canchas:view");
+    }
+    if (item.title === "Reservas") {
+      return can("reservas:view");
+    }
+    if (item.title === "Torneos") {
+      return can("torneos:view");
+    }
+    if (item.title === "Reportes") {
+      return can("reportes:view");
+    }
+    return true;
+  });
+
+  // Filtrar elementos secundarios según permisos
+  const filteredNavSecondary = data.navSecondary.filter((item) => {
+    if (item.title === "Ajustes del Club") {
+      return can("club:edit");
+    }
+    return true;
+  });
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -178,8 +193,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={filteredNavMain} />
+        <NavSecondary items={filteredNavSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={userData} />
