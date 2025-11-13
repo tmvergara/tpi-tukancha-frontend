@@ -7,6 +7,9 @@ import { API_URL } from "@/lib/config";
 import { DataTable } from "./data-table";
 import { getColumns } from "./columns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import Link from "next/link";
 
 export interface Cancha {
   id: number;
@@ -77,9 +80,19 @@ export default function CanchasPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Canchas</h1>
-        <p className="text-muted-foreground">Gestiona las canchas de tu club</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Canchas</h1>
+          <p className="text-muted-foreground">
+            Gestiona las canchas de tu club
+          </p>
+        </div>
+        <Link href="/admin/canchas/crear">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Nueva Cancha
+          </Button>
+        </Link>
       </div>
       <DataTable columns={getColumns(fetchCanchas)} data={canchas} />
     </div>
