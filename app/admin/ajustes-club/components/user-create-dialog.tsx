@@ -260,6 +260,7 @@ export function UserCreateDialog({
               <SelectContent>
                 <SelectItem value="1">Administrador</SelectItem>
                 <SelectItem value="2">Encargado</SelectItem>
+                <SelectItem value="3">Org. de Torneos</SelectItem>
               </SelectContent>
             </Select>
           </div>

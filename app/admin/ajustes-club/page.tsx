@@ -104,6 +104,15 @@ export default function AjustesClubPage() {
     return roleName === "admin" ? "secondary" : "outline";
   };
 
+  const getRoleLabel = (roleName: string) => {
+    const labels: Record<string, string> = {
+      admin: "Administrador",
+      encargado: "Encargado",
+      org_torneos: "Org. de Torneos",
+    };
+    return labels[roleName] || roleName;
+  };
+
   // Contar administradores activos
   const adminCount = users.filter((u) => u.rol.nombre === "admin").length;
 
@@ -203,9 +212,7 @@ export default function AjustesClubPage() {
                         <TableCell>{user.telefono || "-"}</TableCell>
                         <TableCell>
                           <Badge variant={getRoleBadgeVariant(user.rol.nombre)}>
-                            {user.rol.nombre === "admin"
-                              ? "Administrador"
-                              : "Encargado"}
+                            {getRoleLabel(user.rol.nombre)}
                           </Badge>
                         </TableCell>
                         <TableCell>
