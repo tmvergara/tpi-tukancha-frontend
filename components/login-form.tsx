@@ -118,7 +118,8 @@ export function LoginForm({
                   {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
                 </Button>
                 <FieldDescription className="text-center">
-                  ¿No tienes una cuenta? <a href="/register">Regístrate</a>
+                  ¿Sos un club y queres sumarte a TuKancha?{" "}
+                  <a href="/register">Regístrate</a>
                 </FieldDescription>
               </Field>
             </FieldGroup>
