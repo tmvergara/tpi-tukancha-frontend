@@ -30,6 +30,11 @@ import { API_URL } from "@/lib/config";
 import { authenticatedFetch } from "@/lib/auth";
 import { UserDetailed } from "@/lib/types";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export default function AjustesClubPage() {
   const { user } = useAuth();
@@ -96,7 +101,15 @@ export default function AjustesClubPage() {
   };
 
   const getRoleBadgeVariant = (roleName: string) => {
-    return roleName === "admin" ? "default" : "secondary";
+    return roleName === "admin" ? "secondary" : "outline";
+  };
+
+  // Contar administradores activos
+  const adminCount = users.filter((u) => u.rol.nombre === "admin").length;
+
+  // Verificar si un usuario es el único admin y no se puede eliminar
+  const isLastAdmin = (userToCheck: UserDetailed) => {
+    return userToCheck.rol.nombre === "admin" && adminCount === 1;
   };
 
   // Verificar permisos - solo admin puede acceder
@@ -197,9 +210,14 @@ export default function AjustesClubPage() {
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={user.activo ? "default" : "secondary"}
+                            variant="outline"
+                            className={
+                              user.activo
+                                ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800"
+                                : "bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800"
+                            }
                           >
-                            {user.activo ? "Activo" : "Inactivo"}
+                            {user.activo ? "Activa" : "Inactiva"}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
@@ -211,13 +229,41 @@ export default function AjustesClubPage() {
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openDeleteDialog(user)}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                            {isLastAdmin(user) ? (
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <span>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      disabled
+                                    >
+                                      <Trash2 className="h-4 w-4 text-muted-foreground" />
+                                    </Button>
+                                  </span>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80" side="left">
+                                  <div className="space-y-2">
+                                    <h4 className="font-medium leading-none">
+                                      No se puede eliminar
+                                    </h4>
+                                    <p className="text-sm text-muted-foreground">
+                                      Este es el único administrador del club.
+                                      Debe existir al menos un administrador
+                                      activo en todo momento.
+                                    </p>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openDeleteDialog(user)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -251,6 +297,7 @@ export default function AjustesClubPage() {
         user={selectedUser}
         clubId={user?.club_id}
         onSuccess={loadUsers}
+        totalAdmins={adminCount}
       />
     </div>
   );

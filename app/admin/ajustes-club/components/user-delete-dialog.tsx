@@ -22,6 +22,7 @@ interface UserDeleteDialogProps {
   user: UserDetailed | null;
   clubId?: number;
   onSuccess: () => void;
+  totalAdmins?: number;
 }
 
 export function UserDeleteDialog({
@@ -30,11 +31,22 @@ export function UserDeleteDialog({
   user,
   clubId,
   onSuccess,
+  totalAdmins = 0,
 }: UserDeleteDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isLastAdmin = user?.rol.nombre === "admin" && totalAdmins === 1;
+
   const handleDelete = async () => {
     if (!user) return;
+
+    // Validación adicional de seguridad
+    if (isLastAdmin) {
+      toast.error(
+        "No se puede eliminar el único administrador del club. Debe existir al menos un administrador activo."
+      );
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -91,6 +103,12 @@ export function UserDeleteDialog({
             no se puede deshacer.
           </DialogDescription>
         </DialogHeader>
+        {isLastAdmin && (
+          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            <strong>Advertencia:</strong> Este es el único administrador del
+            club. No se puede eliminar.
+          </div>
+        )}
         <DialogFooter>
           <Button
             variant="outline"
@@ -102,7 +120,7 @@ export function UserDeleteDialog({
           <Button
             variant="destructive"
             onClick={handleDelete}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLastAdmin}
           >
             {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Eliminar
