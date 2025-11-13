@@ -4,7 +4,7 @@ export interface User {
     id: number;
     nombre: string;
     email: string;
-    rol: "admin" | "socio";
+    rol: "admin" | "encargado";
     club_id: number;
 }
 

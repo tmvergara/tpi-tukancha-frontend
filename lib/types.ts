@@ -2,8 +2,31 @@ export interface User {
   id: number;
   nombre: string;
   email: string;
-  rol: "admin" | "socio";
+  rol: "admin" | "encargado";
   club_id: number;
+  telefono?: string;
+  activo?: boolean;
+}
+
+export interface UserDetailed {
+  id: number;
+  nombre: string;
+  email: string;
+  telefono: string | null;
+  activo: boolean;
+  club: {
+    id: number;
+    nombre: string;
+    cuit?: string;
+    telefono?: string;
+    direccion_id?: number;
+  };
+  rol: {
+    id: number;
+    nombre: "admin" | "encargado";
+  };
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Horario {
