@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { authenticatedFetch } from "@/lib/auth";
 import { API_URL } from "@/lib/config";
 import { DataTable } from "./data-table";
-import { columns } from "./columns";
+import { getColumns } from "./columns";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export interface Cancha {
@@ -28,29 +28,30 @@ export default function CanchasPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchCanchas() {
-      if (!user?.club_id) return;
+  const fetchCanchas = async () => {
+    if (!user?.club_id) return;
 
-      try {
-        setLoading(true);
-        const response = await authenticatedFetch(
-          `${API_URL}/canchas/club/${user.club_id}`
-        );
+    try {
+      setLoading(true);
+      const response = await authenticatedFetch(
+        `${API_URL}/canchas/club/${user.club_id}`
+      );
 
-        if (!response.ok) {
-          throw new Error("Error al cargar las canchas");
-        }
-
-        const data = await response.json();
-        setCanchas(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error desconocido");
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error("Error al cargar las canchas");
       }
-    }
 
+      const data = await response.json();
+      setCanchas(data);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error desconocido");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (!authLoading && user) {
       fetchCanchas();
     }
@@ -80,7 +81,7 @@ export default function CanchasPage() {
         <h1 className="text-3xl font-bold tracking-tight">Canchas</h1>
         <p className="text-muted-foreground">Gestiona las canchas de tu club</p>
       </div>
-      <DataTable columns={columns} data={canchas} />
+      <DataTable columns={getColumns(fetchCanchas)} data={canchas} />
     </div>
   );
 }

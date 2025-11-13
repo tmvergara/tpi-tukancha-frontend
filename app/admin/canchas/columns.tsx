@@ -18,7 +18,13 @@ import { EditCanchaDialog } from "./edit-cancha-dialog";
 import { useState } from "react";
 
 // Componente para las acciones de cada fila
-function CanchaActions({ cancha }: { cancha: Cancha }) {
+function CanchaActions({
+  cancha,
+  onUpdate,
+}: {
+  cancha: Cancha;
+  onUpdate: () => void;
+}) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
@@ -52,17 +58,19 @@ function CanchaActions({ cancha }: { cancha: Cancha }) {
         cancha={cancha}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
+        onSuccess={onUpdate}
       />
       <EditCanchaDialog
         cancha={cancha}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+        onSuccess={onUpdate}
       />
     </>
   );
 }
 
-export const columns: ColumnDef<Cancha>[] = [
+export const getColumns = (onUpdate: () => void): ColumnDef<Cancha>[] => [
   {
     accessorKey: "nombre",
     header: "Nombre",
@@ -93,7 +101,14 @@ export const columns: ColumnDef<Cancha>[] = [
     cell: ({ row }) => {
       const techado = row.getValue("techado") as boolean;
       return (
-        <Badge variant={techado ? "default" : "secondary"}>
+        <Badge
+          variant="outline"
+          className={
+            techado
+              ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800"
+              : "bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800"
+          }
+        >
           {techado ? "Sí" : "No"}
         </Badge>
       );
@@ -105,7 +120,14 @@ export const columns: ColumnDef<Cancha>[] = [
     cell: ({ row }) => {
       const iluminacion = row.getValue("iluminacion") as boolean;
       return (
-        <Badge variant={iluminacion ? "default" : "secondary"}>
+        <Badge
+          variant="outline"
+          className={
+            iluminacion
+              ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800"
+              : "bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800"
+          }
+        >
           {iluminacion ? "Sí" : "No"}
         </Badge>
       );
@@ -125,7 +147,14 @@ export const columns: ColumnDef<Cancha>[] = [
     cell: ({ row }) => {
       const activa = row.getValue("activa") as boolean;
       return (
-        <Badge variant={activa ? "default" : "destructive"}>
+        <Badge
+          variant="outline"
+          className={
+            activa
+              ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800"
+              : "bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800"
+          }
+        >
           {activa ? "Activa" : "Inactiva"}
         </Badge>
       );
@@ -136,7 +165,7 @@ export const columns: ColumnDef<Cancha>[] = [
     header: "Acciones",
     cell: ({ row }) => {
       const cancha = row.original;
-      return <CanchaActions cancha={cancha} />;
+      return <CanchaActions cancha={cancha} onUpdate={onUpdate} />;
     },
   },
 ];

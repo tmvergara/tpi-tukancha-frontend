@@ -12,45 +12,49 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
+import { authenticatedFetch } from "@/lib/auth";
+import { API_URL } from "@/lib/config";
 
 interface DeleteCanchaDialogProps {
   cancha: Cancha;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 export function DeleteCanchaDialog({
   cancha,
   open,
   onOpenChange,
+  onSuccess,
 }: DeleteCanchaDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    setError(null);
 
-    // TODO: Integrar con el backend cuando esté listo
-    // try {
-    //   await authenticatedFetch(`${API_URL}/canchas/${cancha.id}`, {
-    //     method: 'DELETE',
-    //   });
-    //   toast.success('Cancha eliminada exitosamente');
-    //   onOpenChange(false);
-    //   // Recargar las canchas
-    // } catch (error) {
-    //   toast.error('Error al eliminar la cancha');
-    // } finally {
-    //   setIsDeleting(false);
-    // }
+    try {
+      const response = await authenticatedFetch(
+        `${API_URL}/canchas/${cancha.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-    // Simulación temporal
-    setTimeout(() => {
-      console.log("Eliminando cancha:", cancha.id);
-      setIsDeleting(false);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al eliminar la cancha");
+      }
+
       onOpenChange(false);
-      // Aquí mostrarías un toast de éxito
-      alert(`Cancha "${cancha.nombre}" eliminada (simulación)`);
-    }, 1000);
+      onSuccess?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error desconocido");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -71,6 +75,11 @@ export function DeleteCanchaDialog({
             ? Esta acción no se puede deshacer.
           </DialogDescription>
         </DialogHeader>
+        {error && (
+          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
+            <p className="text-sm text-destructive">{error}</p>
+          </div>
+        )}
         <DialogFooter className="gap-2 sm:gap-0">
           <Button
             variant="outline"

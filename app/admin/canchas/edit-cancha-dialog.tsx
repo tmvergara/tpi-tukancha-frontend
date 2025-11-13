@@ -14,19 +14,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { authenticatedFetch } from "@/lib/auth";
+import { API_URL } from "@/lib/config";
 
 interface EditCanchaDialogProps {
   cancha: Cancha;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 export function EditCanchaDialog({
   cancha,
   open,
   onOpenChange,
+  onSuccess,
 }: EditCanchaDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     nombre: cancha.nombre,
     deporte: cancha.deporte,
@@ -40,31 +45,30 @@ export function EditCanchaDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
-    // TODO: Integrar con el backend cuando esté listo
-    // try {
-    //   await authenticatedFetch(`${API_URL}/canchas/${cancha.id}`, {
-    //     method: 'PUT',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(formData),
-    //   });
-    //   toast.success('Cancha actualizada exitosamente');
-    //   onOpenChange(false);
-    //   // Recargar las canchas
-    // } catch (error) {
-    //   toast.error('Error al actualizar la cancha');
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
+    try {
+      const response = await authenticatedFetch(
+        `${API_URL}/canchas/${cancha.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
 
-    // Simulación temporal
-    setTimeout(() => {
-      console.log("Actualizando cancha:", cancha.id, formData);
-      setIsSubmitting(false);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al actualizar la cancha");
+      }
+
       onOpenChange(false);
-      // Aquí mostrarías un toast de éxito
-      alert(`Cancha "${formData.nombre}" actualizada (simulación)`);
-    }, 1000);
+      onSuccess?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error desconocido");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -77,6 +81,11 @@ export function EditCanchaDialog({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
+              <p className="text-sm text-destructive">{error}</p>
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="nombre">Nombre</Label>
