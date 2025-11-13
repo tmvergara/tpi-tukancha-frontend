@@ -16,6 +16,7 @@ import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { DeleteCanchaDialog } from "./delete-cancha-dialog";
 import { EditCanchaDialog } from "./edit-cancha-dialog";
 import { useState } from "react";
+import { usePermissions } from "@/hooks/use-permissions";
 
 // Componente para las acciones de cada fila
 function CanchaActions({
@@ -27,6 +28,15 @@ function CanchaActions({
 }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const { can } = usePermissions();
+
+  const canEdit = can("canchas:edit");
+  const canDelete = can("canchas:delete");
+
+  // Si no puede hacer nada, no mostrar el menú
+  if (!canEdit && !canDelete) {
+    return null;
+  }
 
   return (
     <>
@@ -40,32 +50,40 @@ function CanchaActions({
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
-            <Pencil className="mr-2 h-4 w-4" />
-            Editar
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => setShowDeleteDialog(true)}
-            variant="destructive"
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Eliminar
-          </DropdownMenuItem>
+          {canEdit && (
+            <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Editar
+            </DropdownMenuItem>
+          )}
+          {canDelete && (
+            <DropdownMenuItem
+              onClick={() => setShowDeleteDialog(true)}
+              variant="destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Eliminar
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <DeleteCanchaDialog
-        cancha={cancha}
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onSuccess={onUpdate}
-      />
-      <EditCanchaDialog
-        cancha={cancha}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-        onSuccess={onUpdate}
-      />
+      {canDelete && (
+        <DeleteCanchaDialog
+          cancha={cancha}
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          onSuccess={onUpdate}
+        />
+      )}
+      {canEdit && (
+        <EditCanchaDialog
+          cancha={cancha}
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          onSuccess={onUpdate}
+        />
+      )}
     </>
   );
 }

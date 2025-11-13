@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { usePermissions } from "@/hooks/use-permissions";
 import { authenticatedFetch } from "@/lib/auth";
 import { API_URL } from "@/lib/config";
 import { DataTable } from "./data-table";
@@ -10,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { UnauthorizedAlert } from "@/components/unauthorized-alert";
 
 export interface Cancha {
   id: number;
@@ -27,6 +29,7 @@ export interface Cancha {
 
 export default function CanchasPage() {
   const { user, loading: authLoading } = useAuth();
+  const { can } = usePermissions();
   const [canchas, setCanchas] = useState<Cancha[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,6 +81,21 @@ export default function CanchasPage() {
     );
   }
 
+  // Verificar si tiene permiso para ver canchas
+  if (!can("canchas:view")) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Canchas</h1>
+          <p className="text-muted-foreground">
+            Gestiona las canchas de tu club
+          </p>
+        </div>
+        <UnauthorizedAlert permission="canchas:view" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -87,12 +105,14 @@ export default function CanchasPage() {
             Gestiona las canchas de tu club
           </p>
         </div>
-        <Link href="/admin/canchas/crear">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Nueva Cancha
-          </Button>
-        </Link>
+        {can("canchas:create") && (
+          <Link href="/admin/canchas/crear">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Nueva Cancha
+            </Button>
+          </Link>
+        )}
       </div>
       <DataTable columns={getColumns(fetchCanchas)} data={canchas} />
     </div>

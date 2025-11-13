@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
+import { usePermissions } from "@/hooks/use-permissions";
 import { authenticatedFetch } from "@/lib/auth";
 import { API_URL } from "@/lib/config";
 import { useForm, Controller } from "react-hook-form";
@@ -27,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { UnauthorizedAlert } from "@/components/unauthorized-alert";
 
 const createCanchaSchema = z.object({
   nombre: z.string().min(1, "El nombre de la cancha es obligatorio"),
@@ -42,6 +44,7 @@ type CreateCanchaFormData = z.infer<typeof createCanchaSchema>;
 export default function CrearCanchaPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { can } = usePermissions();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -102,6 +105,30 @@ export default function CrearCanchaPage() {
       <div className="space-y-4">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
+  // Verificar permisos
+  if (!can("canchas:create")) {
+    return (
+      <div>
+        <div className="flex items-center gap-4">
+          <Link href="/admin/canchas">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Crear Cancha</h1>
+            <p className="text-muted-foreground">
+              Agrega una nueva cancha a tu club
+            </p>
+          </div>
+        </div>
+        <div className="max-w-2xl mx-auto mt-10">
+          <UnauthorizedAlert permission="canchas:create" />
+        </div>
       </div>
     );
   }
