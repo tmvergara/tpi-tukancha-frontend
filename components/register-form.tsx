@@ -29,6 +29,7 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { Eye, EyeOff } from "lucide-react";
 
 type Horario = {
   dia: string;
@@ -125,6 +126,8 @@ export function SignupForm({
     clubName: string;
     email: string;
   } | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -534,12 +537,28 @@ export function SignupForm({
                     <FieldLabel htmlFor="password">
                       Contraseña <span className="text-red-600">*</span>
                     </FieldLabel>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Mínimo 8 caracteres"
-                      {...register("password")}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Mínimo 8 caracteres"
+                        {...register("password")}
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
                     {errors.password && (
                       <FieldDescription className="text-red-600">
                         {errors.password.message}
@@ -551,12 +570,30 @@ export function SignupForm({
                       Confirmar contraseña{" "}
                       <span className="text-red-600">*</span>
                     </FieldLabel>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      placeholder="Repite tu contraseña"
-                      {...register("confirmPassword")}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="confirm-password"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Repite tu contraseña"
+                        {...register("confirmPassword")}
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
                     {errors.confirmPassword && (
                       <FieldDescription className="text-red-600">
                         {errors.confirmPassword.message}
