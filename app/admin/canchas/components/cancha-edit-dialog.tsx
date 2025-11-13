@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Cancha } from "./page";
+import { Cancha } from "../page";
 import {
   Dialog,
   DialogContent,

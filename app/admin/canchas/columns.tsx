@@ -13,8 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { DeleteCanchaDialog } from "./delete-cancha-dialog";
-import { EditCanchaDialog } from "./edit-cancha-dialog";
+import { DeleteCanchaDialog } from "./components/cancha-delete-dialog";
+import { EditCanchaDialog } from "./components/cancha-edit-dialog";
 import { useState } from "react";
 import { usePermissions } from "@/hooks/use-permissions";
 
