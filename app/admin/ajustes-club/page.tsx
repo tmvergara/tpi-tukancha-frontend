@@ -92,18 +92,22 @@ export default function AjustesClubPage() {
       );
 
       if (!response.ok) {
-        throw new Error("Error al cargar usuarios");
+        let errorMessage = "Error al cargar usuarios";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch {
+          errorMessage = `Error ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
       setUsers(data);
     } catch (error) {
       console.error("Error loading users:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Error al cargar la lista de usuarios"
-      );
+      const errorMessage = error instanceof Error ? error.message : "Error al cargar la lista de usuarios";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -136,8 +140,15 @@ export default function AjustesClubPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Error al crear usuario");
+        let errorMessage = "Error al crear usuario";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch {
+          // Si no se puede parsear el JSON, usar mensaje genérico
+          errorMessage = `Error ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       toast.success("Usuario creado exitosamente");
@@ -146,9 +157,8 @@ export default function AjustesClubPage() {
       loadUsers();
     } catch (error) {
       console.error("Error creating user:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Error al crear usuario"
-      );
+      const errorMessage = error instanceof Error ? error.message : "Error al crear usuario";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -187,8 +197,14 @@ export default function AjustesClubPage() {
       );
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Error al actualizar usuario");
+        let errorMessage = "Error al actualizar usuario";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch {
+          errorMessage = `Error ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       toast.success("Usuario actualizado exitosamente");
@@ -198,9 +214,8 @@ export default function AjustesClubPage() {
       loadUsers();
     } catch (error) {
       console.error("Error updating user:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Error al actualizar usuario"
-      );
+      const errorMessage = error instanceof Error ? error.message : "Error al actualizar usuario";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -233,8 +248,14 @@ export default function AjustesClubPage() {
       );
 
       if (!response.ok && response.status !== 204) {
-        const error = await response.json();
-        throw new Error(error.error || "Error al eliminar usuario");
+        let errorMessage = "Error al eliminar usuario";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch {
+          errorMessage = `Error ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       toast.success("Usuario eliminado exitosamente");
@@ -243,9 +264,8 @@ export default function AjustesClubPage() {
       loadUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Error al eliminar usuario"
-      );
+      const errorMessage = error instanceof Error ? error.message : "Error al eliminar usuario";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
