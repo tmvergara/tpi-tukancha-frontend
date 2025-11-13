@@ -2,7 +2,7 @@ export interface User {
   id: number;
   nombre: string;
   email: string;
-  rol: "admin" | "encargado";
+  rol: "admin" | "encargado" | "org_torneos";
   club_id: number;
   telefono?: string;
   activo?: boolean;
@@ -23,7 +23,7 @@ export interface UserDetailed {
   };
   rol: {
     id: number;
-    nombre: "admin" | "encargado";
+    nombre: "admin" | "encargado" | "org_torneos";
   };
   created_at: string;
   updated_at: string;

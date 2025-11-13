@@ -1,7 +1,7 @@
 import { User } from "./auth";
 
 // Define los roles disponibles
-export type Role = "admin" | "encargado";
+export type Role = "admin" | "encargado" | "org_torneos";
 
 // Define las acciones/permisos disponibles
 export type Permission =
@@ -47,8 +47,14 @@ const rolePermissions: Record<Role, Permission[]> = {
         "reservas:create",
         "reservas:edit",
         "reservas:delete",
-        "reportes:view",
         "torneos:view",
+    ],
+    org_torneos: [
+        // Organizadores de torneos solo pueden gestionar torneos
+        "torneos:view",
+        "torneos:create",
+        "torneos:edit",
+        "torneos:delete",
     ],
 };
 
@@ -115,6 +121,7 @@ export function getRoleName(role: Role): string {
     const roleNames: Record<Role, string> = {
         admin: "Administrador",
         encargado: "Encargado",
+        org_torneos: "Org. de Torneos",
     };
 
     return roleNames[role] || role;
