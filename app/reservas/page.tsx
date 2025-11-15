@@ -14,6 +14,7 @@ import {
   HorarioDisponibilidad,
   DisponibilidadResponse,
   ReservaResponse,
+  PreferenciaPagoResponse,
 } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -86,6 +87,9 @@ export default function ReservasPage() {
   const [reservaCreada, setReservaCreada] =
     React.useState<ReservaResponse | null>(null);
   const [isCreatingReserva, setIsCreatingReserva] = React.useState(false);
+
+  // Estado para el proceso de pago
+  const [isCreatingPago, setIsCreatingPago] = React.useState(false);
 
   // Estado del formulario de reserva
   const [formData, setFormData] = React.useState({
@@ -305,6 +309,34 @@ export default function ReservasPage() {
       alert("Error al crear la reserva. Por favor intentá nuevamente.");
     } finally {
       setIsCreatingReserva(false);
+    }
+  };
+
+  const handlePagarConMercadoPago = async () => {
+    if (!reservaCreada) return;
+
+    try {
+      setIsCreatingPago(true);
+
+      // Crear preferencia de pago
+      const response = await fetch(
+        `${API_URL}/pagos/crear-preferencia/${reservaCreada.id}`,
+        { method: "POST" }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al crear la preferencia de pago");
+      }
+
+      const data: PreferenciaPagoResponse = await response.json();
+
+      // Redirigir al checkout de MercadoPago (sandbox para testing)
+      window.location.href = data.init_point;
+    } catch (error) {
+      console.error("Error creating payment preference:", error);
+      alert("Error al iniciar el pago. Por favor intentá nuevamente.");
+    } finally {
+      setIsCreatingPago(false);
     }
   };
 
@@ -953,16 +985,34 @@ export default function ReservasPage() {
                 </CardContent>
               </Card>
 
-              {/* Botón cerrar */}
-              <Button
-                className="w-full bg-[#FFBF2C] hover:bg-[#FFBF2C]/90 text-zinc-900"
-                onClick={() => {
-                  setSuccessDialogOpen(false);
-                  setReservaCreada(null);
-                }}
-              >
-                Cerrar
-              </Button>
+              {/* Botones */}
+              <div className="flex flex-col gap-3">
+                <Button
+                  className="w-full bg-[#009EE3] hover:bg-[#009EE3]/90 text-white"
+                  onClick={handlePagarConMercadoPago}
+                  disabled={isCreatingPago}
+                >
+                  {isCreatingPago ? (
+                    <>
+                      <span className="animate-spin mr-2">⏳</span>
+                      Redirigiendo...
+                    </>
+                  ) : (
+                    "Pagar con MercadoPago"
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setSuccessDialogOpen(false);
+                    setReservaCreada(null);
+                  }}
+                  disabled={isCreatingPago}
+                >
+                  Cerrar
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>

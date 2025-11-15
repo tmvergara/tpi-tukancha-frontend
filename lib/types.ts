@@ -102,3 +102,10 @@ export interface ReservaResponse {
   created_at: string;
   updated_at: string;
 }
+
+// Tipo para la respuesta de preferencia de pago
+export interface PreferenciaPagoResponse {
+  preference_id: string;
+  init_point: string;
+  sandbox_init_point: string;
+}
