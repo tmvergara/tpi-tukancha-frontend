@@ -45,19 +45,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-
-// Servicios disponibles
-const SERVICIOS_DISPONIBLES = [
-  "Parrilla",
-  "Bebidas",
-  "Pelota",
-  "Vestuarios",
-  "Estacionamiento",
-  "Duchas",
-];
+import { CanchaCard } from "@/components/reservas/cancha-card";
+import { DisponibilidadGrid } from "@/components/reservas/disponibilidad-grid";
+import {
+  ReservaForm,
+  SERVICIOS_DISPONIBLES,
+} from "@/components/reservas/reserva-form";
+import { ReservaResumen } from "@/components/reservas/reserva-resumen";
 
 export default function ReservasPage() {
   const [open, setOpen] = React.useState(false);
@@ -570,40 +564,11 @@ export default function ReservasPage() {
                     No hay información de disponibilidad
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    {disponibilidad.horarios.map((horario) => {
-                      const hayDisponibilidad =
-                        horario.canchas_disponibles.length > 0;
-                      const isPast =
-                        date.toDateString() === new Date().toDateString() &&
-                        parseInt(horario.hora.split(":")[0]) <
-                          new Date().getHours();
-
-                      return (
-                        <button
-                          key={horario.hora}
-                          onClick={() => handleHorarioClick(horario)}
-                          disabled={!hayDisponibilidad || isPast}
-                          className={cn(
-                            "h-16 rounded-md text-base font-medium transition-colors relative",
-                            !hayDisponibilidad || isPast
-                              ? "bg-zinc-100 text-zinc-400 cursor-not-allowed dark:bg-zinc-800"
-                              : "bg-white border-2 border-zinc-200 hover:border-[#FFBF2C] hover:bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-700 dark:hover:border-[#FFBF2C] dark:hover:bg-zinc-800"
-                          )}
-                        >
-                          <div>{horario.hora}</div>
-                          {hayDisponibilidad && !isPast && (
-                            <div className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                              {horario.canchas_disponibles.length}{" "}
-                              {horario.canchas_disponibles.length === 1
-                                ? "cancha"
-                                : "canchas"}
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <DisponibilidadGrid
+                    horarios={disponibilidad.horarios}
+                    onHorarioClick={handleHorarioClick}
+                    selectedDate={date}
+                  />
                 )}
               </CardContent>
             </Card>
@@ -631,172 +596,32 @@ export default function ReservasPage() {
             // Lista de canchas disponibles
             <div className="space-y-3 mt-4">
               {selectedHorario?.canchas_disponibles.map((cancha) => (
-                <Card
+                <CanchaCard
                   key={cancha.timeslot_id}
-                  className="cursor-pointer hover:border-[#FFBF2C] transition-colors"
+                  cancha={cancha}
                   onClick={() => handleCanchaSelect(cancha)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg">
-                          {cancha.nombre}
-                        </h3>
-                        <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">
-                          {cancha.deporte}
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {cancha.techado && (
-                            <Badge variant="secondary">Techada</Badge>
-                          )}
-                          {cancha.iluminacion && (
-                            <Badge variant="outline">Iluminación</Badge>
-                          )}
-                          <Badge variant="outline">{cancha.superficie}m²</Badge>
-                        </div>
-                      </div>
-                      <div className="text-right ml-4">
-                        <p className="text-2xl font-bold text-[#FFBF2C]">
-                          $
-                          {cancha.precio.toLocaleString("es-AR", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                        </p>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                          por hora
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                />
               ))}
             </div>
           ) : (
             // Formulario de reserva
             <div className="space-y-6 mt-4">
               {/* Resumen de la reserva */}
-              <Card className="bg-zinc-50 dark:bg-zinc-900">
-                <CardContent className="p-4">
-                  <h4 className="font-semibold mb-2">Resumen de tu reserva</h4>
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-zinc-600 dark:text-zinc-400">
-                        Cancha:
-                      </span>
-                      <span className="font-medium">
-                        {selectedCancha.nombre} - {selectedCancha.deporte}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-zinc-600 dark:text-zinc-400">
-                        Fecha:
-                      </span>
-                      <span className="font-medium">
-                        {date &&
-                          format(date, "EEEE, d 'de' MMMM 'de' yyyy", {
-                            locale: es,
-                          })}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-zinc-600 dark:text-zinc-400">
-                        Horario:
-                      </span>
-                      <span className="font-medium">
-                        {selectedHorario?.hora}
-                      </span>
-                    </div>
-                    <div className="flex justify-between pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                      <span className="font-semibold">Total:</span>
-                      <span className="text-xl font-bold text-[#FFBF2C]">
-                        $
-                        {selectedCancha.precio.toLocaleString("es-AR", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              {selectedCancha && selectedHorario && date && (
+                <ReservaResumen
+                  cancha={selectedCancha}
+                  fecha={date}
+                  horario={selectedHorario}
+                />
+              )}
 
               {/* Formulario */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nombre">Nombre completo *</Label>
-                  <Input
-                    id="nombre"
-                    name="nombre"
-                    placeholder="Juan Pérez"
-                    value={formData.nombre}
-                    onChange={handleFormChange}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="telefono">Teléfono *</Label>
-                  <Input
-                    id="telefono"
-                    name="telefono"
-                    type="tel"
-                    placeholder="1234567890"
-                    value={formData.telefono}
-                    onChange={handleFormChange}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="juan@example.com"
-                    value={formData.email}
-                    onChange={handleFormChange}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Servicios *</Label>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    Seleccioná los servicios que necesitás
-                  </p>
-                  <div className="grid grid-cols-2 gap-3 pt-2">
-                    {SERVICIOS_DISPONIBLES.map((servicio) => (
-                      <div
-                        key={servicio}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={servicio}
-                          checked={selectedServicios.includes(servicio)}
-                          onCheckedChange={() => handleServicioToggle(servicio)}
-                        />
-                        <label
-                          htmlFor={servicio}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                        >
-                          {servicio}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                  {selectedServicios.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {selectedServicios.map((servicio) => (
-                        <Badge key={servicio} variant="secondary">
-                          {servicio}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <ReservaForm
+                formData={formData}
+                selectedServicios={selectedServicios}
+                onFormChange={handleFormChange}
+                onServicioToggle={handleServicioToggle}
+              />
 
               {/* Botones */}
               <div className="flex gap-3 justify-end pt-4">
@@ -811,7 +636,7 @@ export default function ReservasPage() {
                   Volver
                 </Button>
                 <Button
-                  className="bg-[#FFBF2C] hover:bg-[#FFBF2C]/90 text-zinc-900"
+                  className="bg-primary hover:bg-primary/90 text-zinc-900"
                   onClick={handleConfirmReserva}
                   disabled={
                     !formData.nombre ||
@@ -846,12 +671,12 @@ export default function ReservasPage() {
           {reservaCreada && (
             <div className="space-y-4 mt-4">
               {/* Código de reserva destacado */}
-              <Card className="bg-[#FFBF2C]/10 border-[#FFBF2C]">
+              <Card className="bg-primary/10 border-primary">
                 <CardContent className="p-4 text-center">
                   <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
                     Código de reserva
                   </p>
-                  <p className="text-2xl font-bold text-[#FFBF2C] tracking-wider">
+                  <p className="text-2xl font-bold text-primary tracking-wider">
                     {getCodigoReserva(reservaCreada)}
                   </p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
@@ -940,7 +765,7 @@ export default function ReservasPage() {
                     <div className="border-t pt-2 mt-2">
                       <div className="flex justify-between items-center">
                         <span className="font-semibold">Precio total:</span>
-                        <span className="text-xl font-bold text-[#FFBF2C]">
+                        <span className="text-xl font-bold text-primary">
                           $
                           {reservaCreada.precio_total.toLocaleString("es-AR", {
                             minimumFractionDigits: 2,
@@ -955,7 +780,7 @@ export default function ReservasPage() {
 
               {/* Botón cerrar */}
               <Button
-                className="w-full bg-[#FFBF2C] hover:bg-[#FFBF2C]/90 text-zinc-900"
+                className="w-full bg-primary hover:bg-primary/90 text-zinc-900"
                 onClick={() => {
                   setSuccessDialogOpen(false);
                   setReservaCreada(null);
