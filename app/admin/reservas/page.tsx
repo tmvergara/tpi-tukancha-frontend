@@ -113,7 +113,7 @@ export default function ReservasPage() {
           </p>
         </div>
       </div>
-      <DataTable columns={getColumns()} data={reservas} />
+      <DataTable columns={getColumns(fetchReservas)} data={reservas} />
     </div>
   );
 }

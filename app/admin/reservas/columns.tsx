@@ -4,9 +4,10 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Reserva } from "./page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, DollarSign } from "lucide-react";
 import { useState } from "react";
 import { ReservaDetailDialog } from "./components/reserva-detail-dialog";
+import { CobrarReservaDialog } from "./components/cobrar-reserva-dialog";
 
 // Función helper para formatear fecha
 function formatDate(dateString: string): string {
@@ -71,29 +72,53 @@ function getFuenteLabel(fuente: string): string {
 }
 
 // Componente para las acciones de cada fila
-function ReservaActions({ reserva }: { reserva: Reserva }) {
+function ReservaActions({
+  reserva,
+  onUpdate,
+}: {
+  reserva: Reserva;
+  onUpdate: () => void;
+}) {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [showCobrarDialog, setShowCobrarDialog] = useState(false);
 
   return (
     <>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setShowDetailDialog(true)}
-      >
-        <Eye className="h-4 w-4" />
-      </Button>
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowDetailDialog(true)}
+          title="Ver detalles"
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowCobrarDialog(true)}
+          title="Cobrar reserva"
+        >
+          <DollarSign className="h-4 w-4" />
+        </Button>
+      </div>
 
       <ReservaDetailDialog
         reserva={reserva}
         open={showDetailDialog}
         onOpenChange={setShowDetailDialog}
       />
+      <CobrarReservaDialog
+        reserva={reserva}
+        open={showCobrarDialog}
+        onOpenChange={setShowCobrarDialog}
+        onSuccess={onUpdate}
+      />
     </>
   );
 }
 
-export const getColumns = (): ColumnDef<Reserva>[] => [
+export const getColumns = (onUpdate: () => void): ColumnDef<Reserva>[] => [
   {
     accessorKey: "id",
     header: "ID",
@@ -151,7 +176,7 @@ export const getColumns = (): ColumnDef<Reserva>[] => [
     header: "Acciones",
     cell: ({ row }) => {
       const reserva = row.original;
-      return <ReservaActions reserva={reserva} />;
+      return <ReservaActions reserva={reserva} onUpdate={onUpdate} />;
     },
   },
 ];
