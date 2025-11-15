@@ -81,6 +81,7 @@ function ReservaActions({
 }) {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showCobrarDialog, setShowCobrarDialog] = useState(false);
+  const isPagado = reserva.estado === "PAGADO";
 
   return (
     <>
@@ -97,7 +98,8 @@ function ReservaActions({
           variant="ghost"
           size="icon"
           onClick={() => setShowCobrarDialog(true)}
-          title="Cobrar reserva"
+          title={isPagado ? "Reserva ya pagada" : "Cobrar reserva"}
+          disabled={isPagado}
         >
           <DollarSign className="h-4 w-4" />
         </Button>
