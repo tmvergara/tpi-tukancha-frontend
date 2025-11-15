@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { usePermissions } from "@/hooks/use-permissions";
+import { ro } from "date-fns/locale";
 
 const data = {
   navMain: [
@@ -144,11 +145,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         name: user.nombre,
         email: user.email,
         avatar: "/avatars/default.jpg",
+        rol: user.rol,
       }
     : {
         name: "Usuario",
         email: "email@ejemplo.com",
         avatar: "/avatars/default.jpg",
+        rol: "Error",
       };
 
   // Filtrar elementos de navegación según permisos

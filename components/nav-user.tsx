@@ -25,6 +25,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { logout } from "@/lib/auth";
+import { getRoleName } from "@/lib/permissions";
 import { useRouter } from "next/navigation";
 
 export function NavUser({
@@ -34,6 +35,7 @@ export function NavUser({
     name: string;
     email: string;
     avatar: string;
+    rol?: "admin" | "encargado" | "org_torneos";
   };
 }) {
   const { isMobile } = useSidebar();
@@ -99,6 +101,15 @@ export function NavUser({
                   </span>
                 </div>
               </div>
+
+              {user.rol && (
+                <DropdownMenuItem className="text-xs">
+                  Tu rol es:
+                  <span className="truncate text-primary font-bold">
+                    {getRoleName(user.rol)}
+                  </span>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             {/* <DropdownMenuGroup>
@@ -118,7 +129,7 @@ export function NavUser({
             <DropdownMenuSeparator /> */}
             <DropdownMenuItem onClick={handleLogout}>
               <IconLogout />
-              Log out
+              Cerrar Sesion
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
