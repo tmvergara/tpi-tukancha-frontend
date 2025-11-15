@@ -4,6 +4,7 @@ export interface User {
   email: string;
   rol: "admin" | "encargado" | "org_torneos";
   club_id: number;
+  club_nombre?: string;
   telefono?: string;
   activo?: boolean;
 }
