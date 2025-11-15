@@ -58,7 +58,7 @@ const data = {
         },
         {
           title: "Crear reserva manual",
-          url: "/admin/reservas/crear-manual",
+          url: "/admin/reservas/reserva-manual",
         },
       ],
     },
