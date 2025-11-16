@@ -8,6 +8,7 @@ import { es } from "date-fns/locale";
 
 import { cn } from "@/lib/utils";
 import { API_URL } from "@/lib/config";
+import { authenticatedFetch } from "@/lib/auth";
 import {
   Club,
   Cancha,
@@ -66,6 +67,8 @@ export default function ReservasPage() {
   const [selectedClubData, setSelectedClubData] = React.useState<Club | null>(
     null
   );
+  const [paymentStatus, setPaymentStatus] = React.useState<string | null>(null);
+  const [procesandoPago, setProcesandoPago] = React.useState(false);
 
   // Estado para el dialog de selección de cancha
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -111,6 +114,55 @@ export default function ReservasPage() {
     };
 
     fetchClubs();
+  }, []);
+
+  // Verificar si hay parámetros de retorno de pago
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const payment = params.get("payment");
+      const reservaId = params.get("reserva_id");
+
+      if (payment && reservaId) {
+        setPaymentStatus(payment);
+
+        if (payment === "success") {
+          // Marcar la reserva como pagada en el backend
+          const marcarComoPagada = async () => {
+            try {
+              setProcesandoPago(true);
+              const response = await authenticatedFetch(
+                `${API_URL}/reservas/${reservaId}/pagar`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+
+              if (!response.ok) {
+                console.error("Error al marcar la reserva como pagada");
+              }
+            } catch (error) {
+              console.error("Error calling pagar endpoint:", error);
+            } finally {
+              setProcesandoPago(false);
+            }
+          };
+
+          marcarComoPagada();
+        }
+
+        // Limpiar parámetros de la URL
+        window.history.replaceState({}, "", "/reservas");
+
+        // Mostrar mensaje por 5 segundos
+        setTimeout(() => {
+          setPaymentStatus(null);
+        }, 5000);
+      }
+    }
   }, []);
 
   // Actualizar el club seleccionado cuando cambia
@@ -240,6 +292,24 @@ export default function ReservasPage() {
     return `${reserva.cancha.club_id}${nombreClubLimpio}${reserva.id}`;
   };
 
+  const handlePagarOnline = () => {
+    if (!reservaCreada) return;
+
+    const codigo = getCodigoReserva(reservaCreada);
+    const monto = reservaCreada.precio_total;
+    const nombre = reservaCreada.cliente_nombre;
+
+    // Abrir checkout en nueva pestaña
+    const checkoutUrl = `/checkout/${
+      reservaCreada.id
+    }?monto=${monto}&codigo=${codigo}&nombre=${encodeURIComponent(nombre)}`;
+    window.open(checkoutUrl, "_blank");
+
+    // Cerrar el diálogo para evitar múltiples ventanas
+    setSuccessDialogOpen(false);
+    setReservaCreada(null);
+  };
+
   const handleConfirmReserva = async () => {
     if (!selectedCancha || !selectedHorario || !selectedClub || !date) return;
 
@@ -326,6 +396,76 @@ export default function ReservasPage() {
 
       {/* Main Content */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-8">
+        {/* Mensaje de estado de pago */}
+        {paymentStatus && (
+          <div
+            className={`mb-6 p-4 rounded-lg border ${
+              paymentStatus === "success"
+                ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800"
+                : "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              {paymentStatus === "success" ? (
+                <>
+                  <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-6 h-6 text-green-600 dark:text-green-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-green-800 dark:text-green-200">
+                      ¡Pago exitoso!
+                    </h3>
+                    <p className="text-sm text-green-700 dark:text-green-300">
+                      {procesandoPago
+                        ? "Actualizando el estado de tu reserva..."
+                        : "Tu reserva ha sido marcada como pagada correctamente."}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-6 h-6 text-red-600 dark:text-red-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-red-800 dark:text-red-200">
+                      Pago rechazado
+                    </h3>
+                    <p className="text-sm text-red-700 dark:text-red-300">
+                      No se pudo procesar el pago. Podés intentar nuevamente
+                      desde los detalles de tu reserva.
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
             Reservá tu cancha
@@ -778,16 +918,25 @@ export default function ReservasPage() {
                 </CardContent>
               </Card>
 
-              {/* Botón cerrar */}
-              <Button
-                className="w-full bg-primary hover:bg-primary/90 text-zinc-900"
-                onClick={() => {
-                  setSuccessDialogOpen(false);
-                  setReservaCreada(null);
-                }}
-              >
-                Cerrar
-              </Button>
+              {/* Botones */}
+              <div className="flex gap-3 justify-end pt-4">
+                <Button
+                  variant="outline"
+                  className="bg-sky-500 hover:bg-sky-500/90 text-white hover:text-white"
+                  onClick={handlePagarOnline}
+                >
+                  Pagar reserva online
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSuccessDialogOpen(false);
+                    setReservaCreada(null);
+                  }}
+                >
+                  Cerrar
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
