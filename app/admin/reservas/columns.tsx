@@ -4,10 +4,11 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Reserva } from "./page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, DollarSign } from "lucide-react";
+import { Eye, DollarSign, XCircle } from "lucide-react";
 import { useState } from "react";
 import { ReservaDetailDialog } from "./components/reserva-detail-dialog";
 import { CobrarReservaDialog } from "./components/cobrar-reserva-dialog";
+import { CancelReservaDialog } from "./components/reserva-cancel-dialog";
 
 // Función helper para formatear fecha
 function formatDate(dateString: string): string {
@@ -81,7 +82,9 @@ function ReservaActions({
 }) {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showCobrarDialog, setShowCobrarDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const isPagado = reserva.estado === "PAGADO";
+  const isCancelada = reserva.estado === "CANCELADA";
 
   return (
     <>
@@ -103,6 +106,15 @@ function ReservaActions({
         >
           <DollarSign className="h-4 w-4" />
         </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowCancelDialog(true)}
+          title={isCancelada ? "Reserva ya cancelada" : "Cancelar reserva"}
+          disabled={isCancelada}
+        >
+          <XCircle className="h-4 w-4" />
+        </Button>
       </div>
 
       <ReservaDetailDialog
@@ -114,6 +126,12 @@ function ReservaActions({
         reserva={reserva}
         open={showCobrarDialog}
         onOpenChange={setShowCobrarDialog}
+        onSuccess={onUpdate}
+      />
+      <CancelReservaDialog
+        reserva={reserva}
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
         onSuccess={onUpdate}
       />
     </>
