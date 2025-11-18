@@ -30,6 +30,17 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Eye, EyeOff } from "lucide-react";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { CuitInput } from "@/components/ui/cuit-input";
+import { EmailInput } from "@/components/ui/email-input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PROVINCIAS_ARGENTINA, PAISES } from "@/lib/argentina-data";
 
 type Horario = {
   dia: string;
@@ -79,9 +90,60 @@ const registerSchema = z
   .object({
     // Paso 0: Datos básicos del club
     nombre: z.string().min(1, "El nombre del club es obligatorio"),
-    cuit: z.string().min(1, "El CUIT es obligatorio"),
-    telefono: z.string().min(1, "El teléfono es obligatorio"),
-    email: z.string().email("Ingrese un correo electrónico válido"),
+    cuit: z
+      .string()
+      .min(1, "El CUIT es obligatorio")
+      .refine(
+        (val) => {
+          const numericValue = val.replace(/\D/g, "");
+          return numericValue.length === 11;
+        },
+        {
+          message: "El CUIT debe tener exactamente 11 dígitos",
+        }
+      ),
+    telefono: z
+      .string()
+      .min(1, "El teléfono es obligatorio")
+      .refine(
+        (val) => {
+          const numericValue = val.replace(/\D/g, "");
+          // Código de país (2-3 dígitos) + número (10 dígitos) = 12-13 dígitos total
+          return numericValue.length >= 12 && numericValue.length <= 13;
+        },
+        {
+          message: "El teléfono debe tener el formato completo",
+        }
+      ),
+    email: z
+      .string()
+      .min(1, "El correo electrónico es obligatorio")
+      .email("Ingrese un correo electrónico válido")
+      .refine(
+        async (email) => {
+          // Validar disponibilidad del email
+          try {
+            const API_URL =
+              process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+            const response = await fetch(
+              `${API_URL}/users/check-email/${encodeURIComponent(email)}`
+            );
+
+            if (!response.ok) {
+              return true; // Si hay error en la API, permitir continuar
+            }
+
+            const data = await response.json();
+            return data.registrado === false; // true si está disponible
+          } catch (error) {
+            console.error("Error validando email:", error);
+            return true; // Si hay error, permitir continuar
+          }
+        },
+        {
+          message: "Este correo electrónico ya está registrado",
+        }
+      ),
 
     // Paso 1: Dirección
     calle: z.string().min(1, "La calle es obligatoria"),
@@ -149,7 +211,7 @@ export function SignupForm({
       depto: "",
       ciudad: "",
       provincia: "",
-      pais: "",
+      pais: "Argentina", // Por defecto Argentina
       cp: "",
       horarios: DIAS.map((d) => ({
         dia: d,
@@ -163,6 +225,19 @@ export function SignupForm({
   });
 
   const horarios = watch("horarios");
+  const selectedPais = watch("pais");
+  const selectedProvincia = watch("provincia");
+  const selectedCiudad = watch("ciudad");
+
+  const isArgentina = selectedPais === "Argentina";
+  const isOtroPais = selectedPais === "Otro";
+  const isOtraCiudad = selectedCiudad === "Otra";
+
+  // Obtener ciudades de la provincia seleccionada
+  const ciudadesDisponibles = isArgentina
+    ? PROVINCIAS_ARGENTINA.find((p) => p.nombre === selectedProvincia)
+        ?.ciudades || []
+    : [];
 
   const next = () => setStep((s) => Math.min(3, s + 1));
   const back = () => setStep((s) => Math.max(0, s - 1));
@@ -291,10 +366,17 @@ export function SignupForm({
                       <FieldLabel htmlFor="cuit">
                         CUIT <span className="text-red-600">*</span>
                       </FieldLabel>
-                      <Input
-                        id="cuit"
-                        placeholder="20-12345678-9"
-                        {...register("cuit")}
+                      <Controller
+                        name="cuit"
+                        control={control}
+                        render={({ field }) => (
+                          <CuitInput
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            placeholder="XX-XXXXXXXX-X"
+                          />
+                        )}
                       />
                       {errors.cuit && (
                         <FieldDescription className="text-red-600">
@@ -306,10 +388,17 @@ export function SignupForm({
                       <FieldLabel htmlFor="telefono">
                         Teléfono <span className="text-red-600">*</span>
                       </FieldLabel>
-                      <Input
-                        id="telefono"
-                        placeholder="+54 9 11 1234-5678"
-                        {...register("telefono")}
+                      <Controller
+                        name="telefono"
+                        control={control}
+                        render={({ field }) => (
+                          <PhoneInput
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            placeholder="(XXX) XXX-XXXX"
+                          />
+                        )}
                       />
                       {errors.telefono && (
                         <FieldDescription className="text-red-600">
@@ -322,11 +411,19 @@ export function SignupForm({
                     <FieldLabel htmlFor="email">
                       Correo electrónico <span className="text-red-600">*</span>
                     </FieldLabel>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="admin@miclub.com"
-                      {...register("email")}
+                    <Controller
+                      name="email"
+                      control={control}
+                      render={({ field }) => (
+                        <EmailInput
+                          id="email"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          placeholder="admin@miclub.com"
+                          validateAvailability={true}
+                        />
+                      )}
                     />
                     {errors.email && (
                       <FieldDescription className="text-red-600">
@@ -340,6 +437,175 @@ export function SignupForm({
               {step === 1 && (
                 // Dirección
                 <>
+                  <Field>
+                    <FieldLabel htmlFor="pais">
+                      País <span className="text-red-600">*</span>
+                    </FieldLabel>
+                    <Controller
+                      name="pais"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            // Resetear provincia y ciudad cuando cambia el país
+                            if (value !== "Argentina") {
+                              register("provincia").onChange({
+                                target: { value: "" },
+                              });
+                              register("ciudad").onChange({
+                                target: { value: "" },
+                              });
+                            }
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona un país" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {PAISES.map((pais) => (
+                              <SelectItem key={pais.nombre} value={pais.nombre}>
+                                <span className="flex items-center gap-2">
+                                  <span>{pais.flag}</span>
+                                  <span>{pais.nombre}</span>
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {errors.pais && (
+                      <FieldDescription className="text-red-600">
+                        {errors.pais.message}
+                      </FieldDescription>
+                    )}
+                  </Field>
+
+                  {isOtroPais && (
+                    <Field>
+                      <FieldLabel htmlFor="pais-custom">
+                        Especificar país <span className="text-red-600">*</span>
+                      </FieldLabel>
+                      <Input
+                        id="pais-custom"
+                        placeholder="Ingresa el nombre del país"
+                        {...register("pais")}
+                      />
+                    </Field>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field>
+                      <FieldLabel htmlFor="provincia">
+                        Provincia{" "}
+                        {isArgentina && <span className="text-red-600">*</span>}
+                      </FieldLabel>
+                      {isArgentina ? (
+                        <Controller
+                          name="provincia"
+                          control={control}
+                          render={({ field }) => (
+                            <Select
+                              value={field.value}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                // Resetear ciudad cuando cambia la provincia
+                                register("ciudad").onChange({
+                                  target: { value: "" },
+                                });
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecciona provincia" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {PROVINCIAS_ARGENTINA.map((prov) => (
+                                  <SelectItem
+                                    key={prov.nombre}
+                                    value={prov.nombre}
+                                  >
+                                    {prov.nombre}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      ) : (
+                        <Input
+                          id="provincia"
+                          placeholder="Provincia/Estado"
+                          {...register("provincia")}
+                        />
+                      )}
+                      {errors.provincia && (
+                        <FieldDescription className="text-red-600">
+                          {errors.provincia.message}
+                        </FieldDescription>
+                      )}
+                    </Field>
+
+                    <Field>
+                      <FieldLabel htmlFor="ciudad">
+                        Ciudad{" "}
+                        {(isArgentina || !isOtroPais) && (
+                          <span className="text-red-600">*</span>
+                        )}
+                      </FieldLabel>
+                      {isArgentina && ciudadesDisponibles.length > 0 ? (
+                        <Controller
+                          name="ciudad"
+                          control={control}
+                          render={({ field }) => (
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              disabled={!selectedProvincia}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecciona ciudad" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {ciudadesDisponibles.map((ciudad) => (
+                                  <SelectItem key={ciudad} value={ciudad}>
+                                    {ciudad}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      ) : (
+                        <Input
+                          id="ciudad"
+                          placeholder="Ciudad"
+                          {...register("ciudad")}
+                        />
+                      )}
+                      {errors.ciudad && (
+                        <FieldDescription className="text-red-600">
+                          {errors.ciudad.message}
+                        </FieldDescription>
+                      )}
+                    </Field>
+                  </div>
+
+                  {isOtraCiudad && isArgentina && (
+                    <Field>
+                      <FieldLabel htmlFor="ciudad-custom">
+                        Especificar ciudad{" "}
+                        <span className="text-red-600">*</span>
+                      </FieldLabel>
+                      <Input
+                        id="ciudad-custom"
+                        placeholder="Ingresa el nombre de la ciudad"
+                        {...register("ciudad")}
+                      />
+                    </Field>
+                  )}
+
                   <Field>
                     <FieldLabel htmlFor="calle">
                       Calle <span className="text-red-600">*</span>
@@ -355,6 +621,7 @@ export function SignupForm({
                       </FieldDescription>
                     )}
                   </Field>
+
                   <div className="grid grid-cols-3 gap-4">
                     <Field>
                       <FieldLabel htmlFor="numero">
@@ -394,66 +661,18 @@ export function SignupForm({
                       )}
                     </Field>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Field>
-                      <FieldLabel htmlFor="ciudad">
-                        Ciudad <span className="text-red-600">*</span>
-                      </FieldLabel>
-                      <Input
-                        id="ciudad"
-                        placeholder="Buenos Aires"
-                        {...register("ciudad")}
-                      />
-                      {errors.ciudad && (
-                        <FieldDescription className="text-red-600">
-                          {errors.ciudad.message}
-                        </FieldDescription>
-                      )}
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="provincia">
-                        Provincia <span className="text-red-600">*</span>
-                      </FieldLabel>
-                      <Input
-                        id="provincia"
-                        placeholder="Buenos Aires"
-                        {...register("provincia")}
-                      />
-                      {errors.provincia && (
-                        <FieldDescription className="text-red-600">
-                          {errors.provincia.message}
-                        </FieldDescription>
-                      )}
-                    </Field>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Field>
-                      <FieldLabel htmlFor="pais">
-                        País <span className="text-red-600">*</span>
-                      </FieldLabel>
-                      <Input
-                        id="pais"
-                        placeholder="Argentina"
-                        {...register("pais")}
-                      />
-                      {errors.pais && (
-                        <FieldDescription className="text-red-600">
-                          {errors.pais.message}
-                        </FieldDescription>
-                      )}
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="cp">
-                        Código Postal <span className="text-red-600">*</span>
-                      </FieldLabel>
-                      <Input id="cp" placeholder="C1043" {...register("cp")} />
-                      {errors.cp && (
-                        <FieldDescription className="text-red-600">
-                          {errors.cp.message}
-                        </FieldDescription>
-                      )}
-                    </Field>
-                  </div>
+
+                  <Field>
+                    <FieldLabel htmlFor="cp">
+                      Código Postal <span className="text-red-600">*</span>
+                    </FieldLabel>
+                    <Input id="cp" placeholder="C1043" {...register("cp")} />
+                    {errors.cp && (
+                      <FieldDescription className="text-red-600">
+                        {errors.cp.message}
+                      </FieldDescription>
+                    )}
+                  </Field>
                 </>
               )}
 
@@ -472,12 +691,12 @@ export function SignupForm({
                     {horarios.map((h, idx) => (
                       <div
                         key={h.dia}
-                        className="grid grid-cols-3 items-center gap-2"
+                        className="grid grid-cols-[60px_1fr_auto] items-center gap-4"
                       >
-                        <div className="col-span-1">
+                        <div>
                           <FieldLabel>{h.dia}</FieldLabel>
                         </div>
-                        <div className="col-span-1 flex gap-2 items-center">
+                        <div className="flex gap-2 items-center justify-center">
                           <Controller
                             name={`horarios.${idx}.abre`}
                             control={control}
@@ -485,11 +704,12 @@ export function SignupForm({
                               <Input
                                 type="time"
                                 {...field}
-                                className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none h-12"
+                                step="3600"
+                                className="bg-background text-base font-medium w-full max-w-[140px]"
                               />
                             )}
                           />
-                          <span className="mx-1">–</span>
+                          <span className="mx-1 text-muted-foreground">–</span>
                           <Controller
                             name={`horarios.${idx}.cierra`}
                             control={control}
@@ -497,12 +717,13 @@ export function SignupForm({
                               <Input
                                 type="time"
                                 {...field}
-                                className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none h-12"
+                                step="3600"
+                                className="bg-background text-base font-medium w-full max-w-[140px]"
                               />
                             )}
                           />
                         </div>
-                        <div className="col-span-1 flex items-center justify-end">
+                        <div className="flex items-center justify-end">
                           <div className="flex items-center gap-2">
                             <Controller
                               name={`horarios.${idx}.activo`}
@@ -628,9 +849,72 @@ export function SignupForm({
           </form>
         </CardContent>
       </Card>
+      {step === 0 && (
+        <div className="bg-linear-to-br from-primary/10 via-primary/5 to-background rounded-lg p-6 border">
+          <h2 className="text-xl font-bold mb-3">Que es TuKancha?</h2>
+
+          <p className="text-muted-foreground mb-4">
+            La plataforma que revoluciona la gestión de clubes deportivos y
+            simplifica las reservas de canchas.
+          </p>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="flex gap-3">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <span className="text-xl">📅</span>
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Reservas</h3>
+                <p className="text-xs text-muted-foreground">
+                  Administra las reservas de tus canchas de forma simple y
+                  eficiente
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <span className="text-xl">💳</span>
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Pagos Online</h3>
+                <p className="text-xs text-muted-foreground">
+                  Acepta pagos en línea y lleva el control de tus ingresos
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <span className="text-xl">📊</span>
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Reportes</h3>
+                <p className="text-xs text-muted-foreground">
+                  Visualiza métricas y toma decisiones basadas en datos reales
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <FieldDescription className="px-6 text-center">
-        Al hacer clic en registrar aceptas nuestros <a href="#">Términos</a> y
-        la <a href="#">Política de privacidad</a>.
+        Al hacer clic en registrar aceptas nuestros{" "}
+        <a
+          href="/terminos"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-primary"
+        >
+          Términos
+        </a>{" "}
+        y la{" "}
+        <a
+          href="/privacidad"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-primary"
+        >
+          Política de privacidad
+        </a>
+        .
       </FieldDescription>
 
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
