@@ -7,9 +7,8 @@ import {
   IconChartBar,
   IconDatabase,
   IconFileWord,
-  IconPodium,
+  IconTrophy,
   IconReport,
-  IconSearch,
   IconSettings,
 } from "@tabler/icons-react";
 
@@ -63,25 +62,6 @@ const data = {
       ],
     },
     {
-      title: "Torneos",
-      url: "#",
-      icon: IconPodium,
-      items: [
-        {
-          title: "Ver torneos",
-          url: "/admin/torneos",
-        },
-        {
-          title: "Crear torneo",
-          url: "/admin/torneos/crear",
-        },
-        {
-          title: "Actualizar posiciones",
-          url: "/admin/torneos/actualizar-posiciones",
-        },
-      ],
-    },
-    {
       title: "Reportes",
       url: "#",
       icon: IconChartBar,
@@ -107,14 +87,14 @@ const data = {
   ],
   navSecondary: [
     {
+      title: "Gestion de Torneos",
+      url: "/admin/torneos",
+      icon: IconTrophy,
+    },
+    {
       title: "Ajustes del Club",
       url: "/admin/ajustes-club",
       icon: IconSettings,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
     },
   ],
   documents: [
