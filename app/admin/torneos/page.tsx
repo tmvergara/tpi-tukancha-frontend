@@ -158,7 +158,6 @@ export default function TorneosPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Trophy className="h-8 w-8" />
             Torneos
           </h1>
           <p className="text-muted-foreground">
@@ -222,7 +221,7 @@ export default function TorneosPage() {
               </CardContent>
               <CardFooter className="flex gap-2">
                 <Link href={`/admin/torneos/${torneo.id}`} className="flex-1">
-                  <Button variant="default" className="w-full">
+                  <Button variant="secondary" className="w-full">
                     Ver Detalles
                   </Button>
                 </Link>
