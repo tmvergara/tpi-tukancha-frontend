@@ -16,6 +16,7 @@ import {
   Trophy,
   Edit,
   Trash2,
+  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +42,7 @@ import { CreatePartidoDialog } from "../components/create-partido-dialog";
 import { EditResultadoDialog } from "../components/edit-resultado-dialog";
 import { DeletePartidoDialog } from "../components/delete-partido-dialog";
 import { TablaPosiciones } from "../components/tabla-posiciones";
+import { FinalizarTorneoDialog } from "../components/finalizar-torneo-dialog";
 
 interface Torneo {
   id: number;
@@ -100,6 +102,11 @@ export default function TorneoDetallePage() {
   const [editResultadoOpen, setEditResultadoOpen] = useState(false);
   const [deletePartidoOpen, setDeletePartidoOpen] = useState(false);
   const [selectedPartido, setSelectedPartido] = useState<Partido | null>(null);
+
+  const [finalizarTorneoOpen, setFinalizarTorneoOpen] = useState(false);
+
+  // Verificar si el torneo está finalizado
+  const isTorneoFinalizado = torneo?.estado.toLowerCase() === "finalizado";
 
   const fetchTorneo = async () => {
     try {
@@ -304,6 +311,16 @@ export default function TorneoDetallePage() {
               </div>
             </div>
           </div>
+          {/* Botón para finalizar torneo */}
+          {!isTorneoFinalizado && can("canchas:create") && (
+            <Button
+              variant="outline"
+              onClick={() => setFinalizarTorneoOpen(true)}
+            >
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              Finalizar Torneo
+            </Button>
+          )}
         </div>
 
         {torneo.reglamento && (
@@ -348,7 +365,7 @@ export default function TorneoDetallePage() {
         <TabsContent value="equipos" className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Equipos del Torneo</h2>
-            {can("canchas:create") && (
+            {can("canchas:create") && !isTorneoFinalizado && (
               <Button onClick={() => setCreateEquipoOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Agregar Equipo
@@ -356,14 +373,33 @@ export default function TorneoDetallePage() {
             )}
           </div>
 
+          {isTorneoFinalizado && (
+            <Card className="border-yellow-200 bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-800">
+              <CardContent className="py-4">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  ⚠️ Este torneo ha finalizado. No se pueden realizar cambios en
+                  los equipos.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           {equipos.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Users className="h-16 w-16 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No hay equipos</h3>
                 <p className="text-muted-foreground text-center mb-4">
-                  Agrega equipos para comenzar el torneo
+                  {isTorneoFinalizado
+                    ? "Este torneo no tuvo equipos participantes"
+                    : "Agrega equipos para comenzar el torneo"}
                 </p>
+                {can("canchas:create") && !isTorneoFinalizado && (
+                  <Button onClick={() => setCreateEquipoOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Agregar Equipo
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
@@ -412,6 +448,7 @@ export default function TorneoDetallePage() {
                             setSelectedEquipo(equipo);
                             setEditEquipoOpen(true);
                           }}
+                          disabled={isTorneoFinalizado}
                         >
                           <Edit className="mr-2 h-3 w-3" />
                           Editar
@@ -424,6 +461,7 @@ export default function TorneoDetallePage() {
                             setSelectedEquipo(equipo);
                             setDeleteEquipoOpen(true);
                           }}
+                          disabled={isTorneoFinalizado}
                         >
                           <Trash2 className="mr-2 h-3 w-3" />
                           Eliminar
@@ -441,7 +479,7 @@ export default function TorneoDetallePage() {
         <TabsContent value="partidos" className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Fixture del Torneo</h2>
-            {can("canchas:create") && (
+            {can("canchas:create") && !isTorneoFinalizado && (
               <Button onClick={() => setCreatePartidoOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Programar Partido
@@ -449,14 +487,33 @@ export default function TorneoDetallePage() {
             )}
           </div>
 
+          {isTorneoFinalizado && (
+            <Card className="border-yellow-200 bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-800">
+              <CardContent className="py-4">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  ⚠️ Este torneo ha finalizado. No se pueden programar ni editar
+                  partidos.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           {partidos.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Calendar className="h-16 w-16 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No hay partidos</h3>
                 <p className="text-muted-foreground text-center mb-4">
-                  Programa partidos para comenzar el fixture
+                  {isTorneoFinalizado
+                    ? "Este torneo no tuvo partidos programados"
+                    : "Programa partidos para comenzar el fixture"}
                 </p>
+                {can("canchas:create") && !isTorneoFinalizado && (
+                  <Button onClick={() => setCreatePartidoOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Programar Partido
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
@@ -522,6 +579,7 @@ export default function TorneoDetallePage() {
                                 setEditResultadoOpen(true);
                               }}
                               title="Editar resultado"
+                              disabled={isTorneoFinalizado}
                             >
                               <Edit className="h-3 w-3" />
                             </Button>
@@ -533,6 +591,7 @@ export default function TorneoDetallePage() {
                                 setDeletePartidoOpen(true);
                               }}
                               title="Eliminar partido"
+                              disabled={isTorneoFinalizado}
                             >
                               <Trash2 className="h-3 w-3" />
                             </Button>
@@ -606,6 +665,17 @@ export default function TorneoDetallePage() {
           fetchPosiciones();
         }}
         partidoId={selectedPartido?.id || 0}
+      />
+
+      {/* Diálogo para Finalizar Torneo */}
+      <FinalizarTorneoDialog
+        open={finalizarTorneoOpen}
+        onOpenChange={setFinalizarTorneoOpen}
+        onSuccess={() => {
+          fetchData(); // Recargar todos los datos para actualizar el estado
+        }}
+        torneoId={torneoId}
+        torneoNombre={torneo?.nombre || ""}
       />
     </div>
   );
