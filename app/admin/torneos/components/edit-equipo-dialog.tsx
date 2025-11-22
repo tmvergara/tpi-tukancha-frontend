@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { toast } from "sonner";
 
 interface Equipo {
@@ -141,15 +142,12 @@ export function EditEquipoDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="telefono">Teléfono *</Label>
-              <Input
-                id="telefono"
-                type="tel"
-                placeholder="+54 9 11 1234-5678"
+              <PhoneInput
                 value={formData.telefono}
-                onChange={(e) =>
-                  setFormData({ ...formData, telefono: e.target.value })
+                onChange={(value) =>
+                  setFormData({ ...formData, telefono: value })
                 }
-                required
+                placeholder="(XXX) XXX-XXXX"
               />
             </div>
 
