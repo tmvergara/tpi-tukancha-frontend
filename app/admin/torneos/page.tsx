@@ -138,8 +138,8 @@ export default function TorneosPage() {
     );
   }
 
-  // Verificar permisos (puedes ajustar según tus necesidades)
-  if (!can("canchas:view")) {
+  // Verificar permisos
+  if (!can("torneos:view")) {
     return (
       <div className="space-y-4">
         <div>
@@ -148,7 +148,7 @@ export default function TorneosPage() {
             Gestiona los torneos de tu club
           </p>
         </div>
-        <UnauthorizedAlert permission="canchas:view" />
+        <UnauthorizedAlert permission="torneos:view" />
       </div>
     );
   }
@@ -164,7 +164,7 @@ export default function TorneosPage() {
             Gestiona los torneos de tu club
           </p>
         </div>
-        {can("canchas:create") && (
+        {can("torneos:create") && (
           <Button onClick={() => setCreateDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Nuevo Torneo

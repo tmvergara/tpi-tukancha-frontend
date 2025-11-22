@@ -312,7 +312,7 @@ export default function TorneoDetallePage() {
             </div>
           </div>
           {/* Botón para finalizar torneo */}
-          {!isTorneoFinalizado && can("canchas:create") && (
+          {!isTorneoFinalizado && can("torneos:create") && (
             <Button
               variant="outline"
               onClick={() => setFinalizarTorneoOpen(true)}
@@ -365,7 +365,7 @@ export default function TorneoDetallePage() {
         <TabsContent value="equipos" className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Equipos del Torneo</h2>
-            {can("canchas:create") && !isTorneoFinalizado && (
+            {can("torneos:create") && !isTorneoFinalizado && (
               <Button onClick={() => setCreateEquipoOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Agregar Equipo
@@ -394,7 +394,7 @@ export default function TorneoDetallePage() {
                     ? "Este torneo no tuvo equipos participantes"
                     : "Agrega equipos para comenzar el torneo"}
                 </p>
-                {can("canchas:create") && !isTorneoFinalizado && (
+                {can("torneos:create") && !isTorneoFinalizado && (
                   <Button onClick={() => setCreateEquipoOpen(true)}>
                     <Plus className="mr-2 h-4 w-4" />
                     Agregar Equipo
@@ -479,7 +479,7 @@ export default function TorneoDetallePage() {
         <TabsContent value="partidos" className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Fixture del Torneo</h2>
-            {can("canchas:create") && !isTorneoFinalizado && (
+            {can("torneos:create") && !isTorneoFinalizado && (
               <Button onClick={() => setCreatePartidoOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Programar Partido
@@ -508,7 +508,7 @@ export default function TorneoDetallePage() {
                     ? "Este torneo no tuvo partidos programados"
                     : "Programa partidos para comenzar el fixture"}
                 </p>
-                {can("canchas:create") && !isTorneoFinalizado && (
+                {can("torneos:create") && !isTorneoFinalizado && (
                   <Button onClick={() => setCreatePartidoOpen(true)}>
                     <Plus className="mr-2 h-4 w-4" />
                     Programar Partido
