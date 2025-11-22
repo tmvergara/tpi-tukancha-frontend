@@ -54,7 +54,7 @@ export function CreateTorneoDialog({
     categoria: "",
     fecha_inicio: undefined as Date | undefined,
     fecha_fin: undefined as Date | undefined,
-    estado: "PENDIENTE",
+    estado: "ACTIVO",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,7 +112,7 @@ export function CreateTorneoDialog({
         categoria: "",
         fecha_inicio: undefined,
         fecha_fin: undefined,
-        estado: "PENDIENTE",
+        estado: "ACTIVO",
       });
     } catch (error) {
       toast.error(
@@ -243,25 +243,6 @@ export function CreateTorneoDialog({
                   </PopoverContent>
                 </Popover>
               </div>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="estado">Estado</Label>
-              <Select
-                value={formData.estado}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, estado: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="PENDIENTE">Pendiente</SelectItem>
-                  <SelectItem value="ACTIVO">Activo</SelectItem>
-                  <SelectItem value="FINALIZADO">Finalizado</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
           <DialogFooter>
