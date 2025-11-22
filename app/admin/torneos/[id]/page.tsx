@@ -374,65 +374,71 @@ export default function TorneoDetallePage() {
             </Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {equipos.map((equipo) => (
-                <Card key={equipo.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">
-                          {equipo.nombre}
-                        </CardTitle>
-                        {equipo.representante && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Rep: {equipo.representante}
-                          </p>
-                        )}
+              {equipos.map((equipo) => {
+                // Buscar los puntos del equipo en la tabla de posiciones
+                const posicion = posiciones.find((p) => p.id === equipo.id);
+                const puntos = posicion?.Puntos ?? 0;
+
+                return (
+                  <Card key={equipo.id}>
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">
+                            {equipo.nombre}
+                          </CardTitle>
+                          {equipo.representante && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Rep: {equipo.representante}
+                            </p>
+                          )}
+                        </div>
+                        <Badge variant="outline" className="ml-2">
+                          {puntos} pts
+                        </Badge>
                       </div>
-                      <Badge variant="outline" className="ml-2">
-                        {equipo.puntos || 0} pts
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {equipo.telefono && (
-                      <p className="text-xs text-muted-foreground">
-                        📞 {equipo.telefono}
-                      </p>
-                    )}
-                    {equipo.email && (
-                      <p className="text-xs text-muted-foreground">
-                        ✉️ {equipo.email}
-                      </p>
-                    )}
-                    <div className="flex gap-2 mt-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => {
-                          setSelectedEquipo(equipo);
-                          setEditEquipoOpen(true);
-                        }}
-                      >
-                        <Edit className="mr-2 h-3 w-3" />
-                        Editar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => {
-                          setSelectedEquipo(equipo);
-                          setDeleteEquipoOpen(true);
-                        }}
-                      >
-                        <Trash2 className="mr-2 h-3 w-3" />
-                        Eliminar
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {equipo.telefono && (
+                        <p className="text-xs text-muted-foreground">
+                          📞 {equipo.telefono}
+                        </p>
+                      )}
+                      {equipo.email && (
+                        <p className="text-xs text-muted-foreground">
+                          ✉️ {equipo.email}
+                        </p>
+                      )}
+                      <div className="flex gap-2 mt-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => {
+                            setSelectedEquipo(equipo);
+                            setEditEquipoOpen(true);
+                          }}
+                        >
+                          <Edit className="mr-2 h-3 w-3" />
+                          Editar
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => {
+                            setSelectedEquipo(equipo);
+                            setDeleteEquipoOpen(true);
+                          }}
+                        >
+                          <Trash2 className="mr-2 h-3 w-3" />
+                          Eliminar
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </TabsContent>
