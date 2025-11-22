@@ -332,15 +332,15 @@ export function SignupForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-4 sm:gap-6", className)} {...props}>
       <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Registro de Club</CardTitle>
-          <CardDescription>
+        <CardHeader className="text-center px-4 sm:px-6">
+          <CardTitle className="text-lg sm:text-xl">Registro de Club</CardTitle>
+          <CardDescription className="text-sm">
             Completa los datos del club en los pasos. Paso {step + 1} de 4.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 sm:px-6">
           <form onSubmit={handleFormSubmit(onSubmit)}>
             <FieldGroup>
               {step === 0 && (
@@ -361,7 +361,7 @@ export function SignupForm({
                       </FieldDescription>
                     )}
                   </Field>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field>
                       <FieldLabel htmlFor="cuit">
                         CUIT <span className="text-red-600">*</span>
@@ -496,7 +496,7 @@ export function SignupForm({
                     </Field>
                   )}
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field>
                       <FieldLabel htmlFor="provincia">
                         Provincia{" "}
@@ -622,7 +622,7 @@ export function SignupForm({
                     )}
                   </Field>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     <Field>
                       <FieldLabel htmlFor="numero">
                         Número <span className="text-red-600">*</span>
@@ -687,16 +687,18 @@ export function SignupForm({
                       {errors.horarios.message}
                     </FieldDescription>
                   )}
-                  <div className="grid gap-4">
+                  <div className="grid gap-3 sm:gap-4">
                     {horarios.map((h, idx) => (
                       <div
                         key={h.dia}
-                        className="grid grid-cols-[60px_1fr_auto] items-center gap-4"
+                        className="grid grid-cols-1 sm:grid-cols-[80px_1fr_auto] items-start sm:items-center gap-2 sm:gap-4 pb-3 sm:pb-0 border-b sm:border-b-0"
                       >
                         <div>
-                          <FieldLabel>{h.dia}</FieldLabel>
+                          <FieldLabel className="text-sm sm:text-base">
+                            {h.dia}
+                          </FieldLabel>
                         </div>
-                        <div className="flex gap-2 items-center justify-center">
+                        <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
                           <Controller
                             name={`horarios.${idx}.abre`}
                             control={control}
@@ -705,11 +707,13 @@ export function SignupForm({
                                 type="time"
                                 {...field}
                                 step="3600"
-                                className="bg-background text-base font-medium w-full max-w-[140px]"
+                                className="bg-background text-sm sm:text-base font-medium w-full sm:max-w-[140px]"
                               />
                             )}
                           />
-                          <span className="mx-1 text-muted-foreground">–</span>
+                          <span className="hidden sm:inline mx-1 text-muted-foreground">
+                            –
+                          </span>
                           <Controller
                             name={`horarios.${idx}.cierra`}
                             control={control}
@@ -718,12 +722,12 @@ export function SignupForm({
                                 type="time"
                                 {...field}
                                 step="3600"
-                                className="bg-background text-base font-medium w-full max-w-[140px]"
+                                className="bg-background text-sm sm:text-base font-medium w-full sm:max-w-[140px]"
                               />
                             )}
                           />
                         </div>
-                        <div className="flex items-center justify-end">
+                        <div className="flex items-center justify-start sm:justify-end">
                           <div className="flex items-center gap-2">
                             <Controller
                               name={`horarios.${idx}.activo`}
@@ -735,12 +739,12 @@ export function SignupForm({
                                 />
                               )}
                             />
-                            <span className="text-sm">Activo</span>
+                            <span className="text-xs sm:text-sm">Activo</span>
                           </div>
                         </div>
                         {errors.horarios?.[idx]?.abre && (
-                          <div className="col-span-3">
-                            <FieldDescription className="text-red-600">
+                          <div className="col-span-1 sm:col-span-3">
+                            <FieldDescription className="text-red-600 text-xs sm:text-sm">
                               {errors.horarios[idx]?.abre?.message}
                             </FieldDescription>
                           </div>
@@ -827,21 +831,32 @@ export function SignupForm({
                 </>
               )}
 
-              <div className="flex items-center justify-between mt-4">
-                <div>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0 mt-4">
+                <div className="order-2 sm:order-1">
                   {step > 0 && (
-                    <Button variant="ghost" onClick={back} type="button">
+                    <Button
+                      variant="ghost"
+                      onClick={back}
+                      type="button"
+                      className="w-full sm:w-auto"
+                    >
                       Volver
                     </Button>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 order-1 sm:order-2">
                   {step < 3 ? (
-                    <Button onClick={handleNext} type="button">
+                    <Button
+                      onClick={handleNext}
+                      type="button"
+                      className="w-full sm:w-auto"
+                    >
                       Siguiente
                     </Button>
                   ) : (
-                    <Button type="submit">Registrar</Button>
+                    <Button type="submit" className="w-full sm:w-auto">
+                      Registrar
+                    </Button>
                   )}
                 </div>
               </div>
@@ -850,14 +865,16 @@ export function SignupForm({
         </CardContent>
       </Card>
       {step === 0 && (
-        <div className="bg-linear-to-br from-primary/10 via-primary/5 to-background rounded-lg p-6 border">
-          <h2 className="text-xl font-bold mb-3">Que es TuKancha?</h2>
+        <div className="bg-linear-to-br from-primary/10 via-primary/5 to-background rounded-lg p-4 sm:p-6 border">
+          <h2 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">
+            Que es TuKancha?
+          </h2>
 
-          <p className="text-muted-foreground mb-4">
+          <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">
             La plataforma que revoluciona la gestión de clubes deportivos y
             simplifica las reservas de canchas.
           </p>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <div className="flex gap-3">
               <div className="shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                 <span className="text-xl">📅</span>
@@ -895,7 +912,7 @@ export function SignupForm({
           </div>
         </div>
       )}
-      <FieldDescription className="px-6 text-center">
+      <FieldDescription className="px-2 sm:px-6 text-center text-xs sm:text-sm">
         Al hacer clic en registrar aceptas nuestros{" "}
         <a
           href="/terminos"
@@ -917,7 +934,16 @@ export function SignupForm({
         .
       </FieldDescription>
 
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+      <Dialog
+        open={showSuccessDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            // Si se cierra el modal sin hacer clic en "Iniciar sesión", redirigir a home
+            window.location.href = "/";
+          }
+          setShowSuccessDialog(open);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>¡Registro exitoso! 🎉</DialogTitle>
@@ -944,7 +970,6 @@ export function SignupForm({
           <DialogFooter>
             <Button
               onClick={() => {
-                setShowSuccessDialog(false);
                 window.location.href = "/login";
               }}
               className="w-full sm:w-auto"
