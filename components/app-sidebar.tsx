@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import {
   IconBallFootball,
   IconCalendar,
@@ -26,7 +27,6 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { usePermissions } from "@/hooks/use-permissions";
-import { ro } from "date-fns/locale";
 
 const data = {
   navMain: [
@@ -34,7 +34,6 @@ const data = {
       title: "Canchas",
       url: "#",
       icon: IconBallFootball,
-      isActive: true,
       items: [
         {
           title: "Ver canchas",
@@ -119,6 +118,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth();
   const { can } = usePermissions();
+  const pathname = usePathname();
 
   const userData = user
     ? {
@@ -131,30 +131,42 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         name: "Usuario",
         email: "email@ejemplo.com",
         avatar: "/avatars/default.jpg",
-        rol: "Error",
       };
 
-  // Filtrar elementos de navegación según permisos
-  const filteredNavMain = data.navMain.filter((item) => {
-    if (item.title === "Canchas") {
-      return can("canchas:view");
-    }
-    if (item.title === "Reservas") {
-      return can("reservas:view");
-    }
-    if (item.title === "Torneos") {
-      return can("torneos:view");
-    }
-    if (item.title === "Reportes") {
-      return can("reportes:view");
-    }
-    return true;
-  });
+  // Determinar qué sección está activa basándose en la URL actual
+  const isPathActive = (items: { url: string }[]) => {
+    return items.some((item) => pathname?.startsWith(item.url));
+  };
+
+  // Filtrar elementos de navegación según permisos y agregar isActive dinámicamente
+  const filteredNavMain = data.navMain
+    .filter((item) => {
+      if (item.title === "Canchas") {
+        return can("canchas:view");
+      }
+      if (item.title === "Reservas") {
+        return can("reservas:view");
+      }
+      if (item.title === "Torneos") {
+        return can("torneos:view");
+      }
+      if (item.title === "Reportes") {
+        return can("reportes:view");
+      }
+      return true;
+    })
+    .map((item) => ({
+      ...item,
+      isActive: isPathActive(item.items),
+    }));
 
   // Filtrar elementos secundarios según permisos
   const filteredNavSecondary = data.navSecondary.filter((item) => {
     if (item.title === "Ajustes del Club") {
       return can("club:edit");
+    }
+    if (item.title === "Gestion de Torneos") {
+      return can("torneos:view");
     }
     return true;
   });
