@@ -364,12 +364,6 @@ export default function TorneoDetallePage() {
                 <p className="text-muted-foreground text-center mb-4">
                   Agrega equipos para comenzar el torneo
                 </p>
-                {can("canchas:create") && (
-                  <Button onClick={() => setCreateEquipoOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Agregar Equipo
-                  </Button>
-                )}
               </CardContent>
             </Card>
           ) : (
@@ -463,12 +457,6 @@ export default function TorneoDetallePage() {
                 <p className="text-muted-foreground text-center mb-4">
                   Programa partidos para comenzar el fixture
                 </p>
-                {can("canchas:create") && (
-                  <Button onClick={() => setCreatePartidoOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Programar Partido
-                  </Button>
-                )}
               </CardContent>
             </Card>
           ) : (
