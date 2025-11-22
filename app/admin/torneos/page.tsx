@@ -180,12 +180,6 @@ export default function TorneosPage() {
             <p className="text-muted-foreground text-center mb-4">
               Crea tu primer torneo para comenzar a gestionar competencias
             </p>
-            {can("canchas:create") && (
-              <Button onClick={() => setCreateDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Crear Torneo
-              </Button>
-            )}
           </CardContent>
         </Card>
       ) : (
