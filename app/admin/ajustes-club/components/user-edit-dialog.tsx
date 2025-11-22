@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { EmailInput } from "@/components/ui/email-input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -57,6 +58,9 @@ export function UserEditDialog({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showEditPassword, setShowEditPassword] = useState(false);
+  const [isEmailValid, setIsEmailValid] = useState(true); // Inicialmente válido
+  const [originalEmail, setOriginalEmail] = useState("");
+  const [emailChanged, setEmailChanged] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -68,7 +72,10 @@ export function UserEditDialog({
         rol_id: user.rol.id,
         telefono: user.telefono || "",
       });
+      setOriginalEmail(user.email);
       setShowEditPassword(false);
+      setIsEmailValid(true); // El email original es válido
+      setEmailChanged(false); // Resetear el flag de cambio
     }
   }, [user]);
 
@@ -82,11 +89,22 @@ export function UserEditDialog({
       telefono: "",
     });
     setShowEditPassword(false);
+    setIsEmailValid(true);
+    setOriginalEmail("");
+    setEmailChanged(false);
   };
 
   const handleSubmit = async () => {
     if (!user || !formData.nombre || !formData.email) {
       toast.error("Por favor completa todos los campos requeridos");
+      return;
+    }
+
+    // Si el email cambió, verificar que sea válido y disponible
+    if (emailChanged && !isEmailValid) {
+      toast.error(
+        "Por favor ingresa un correo electrónico válido y disponible"
+      );
       return;
     }
 
@@ -173,13 +191,16 @@ export function UserEditDialog({
           </div>
           <div className="space-y-2">
             <Label htmlFor="edit-email">Email *</Label>
-            <Input
+            <EmailInput
               id="edit-email"
-              type="email"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              onChange={(value) => {
+                setFormData({ ...formData, email: value });
+                setEmailChanged(value !== originalEmail);
+              }}
+              onValidationChange={setIsEmailValid}
+              validateAvailability={emailChanged}
+              placeholder="usuario@example.com"
             />
           </div>
           <div className="space-y-2">

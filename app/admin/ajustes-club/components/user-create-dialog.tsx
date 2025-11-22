@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { EmailInput } from "@/components/ui/email-input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -57,6 +58,7 @@ export function UserCreateDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isEmailValid, setIsEmailValid] = useState(false);
 
   const resetForm = () => {
     setFormData({
@@ -69,11 +71,19 @@ export function UserCreateDialog({
     });
     setShowPassword(false);
     setShowConfirmPassword(false);
+    setIsEmailValid(false);
   };
 
   const handleSubmit = async () => {
     if (!formData.nombre || !formData.email || !formData.password) {
       toast.error("Por favor completa todos los campos requeridos");
+      return;
+    }
+
+    if (!isEmailValid) {
+      toast.error(
+        "Por favor ingresa un correo electrónico válido y disponible"
+      );
       return;
     }
 
@@ -155,13 +165,12 @@ export function UserCreateDialog({
           </div>
           <div className="space-y-2">
             <Label htmlFor="create-email">Email *</Label>
-            <Input
+            <EmailInput
               id="create-email"
-              type="email"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              onChange={(value) => setFormData({ ...formData, email: value })}
+              onValidationChange={setIsEmailValid}
+              validateAvailability={true}
               placeholder="juan@example.com"
             />
           </div>
