@@ -2,8 +2,10 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { Toggle } from "@/components/ui/toggle";
+import { Check } from "lucide-react";
 
 // Servicios disponibles
 export const SERVICIOS_DISPONIBLES = [
@@ -23,6 +25,7 @@ interface ReservaFormProps {
   };
   selectedServicios: string[];
   onFormChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onTelefonoChange: (value: string) => void;
   onServicioToggle: (servicio: string) => void;
 }
 
@@ -30,6 +33,7 @@ export function ReservaForm({
   formData,
   selectedServicios,
   onFormChange,
+  onTelefonoChange,
   onServicioToggle,
 }: ReservaFormProps) {
   return (
@@ -48,14 +52,10 @@ export function ReservaForm({
 
       <div className="space-y-2">
         <Label htmlFor="telefono">Teléfono *</Label>
-        <Input
-          id="telefono"
-          name="telefono"
-          type="tel"
-          placeholder="1234567890"
+        <PhoneInput
           value={formData.telefono}
-          onChange={onFormChange}
-          required
+          onChange={onTelefonoChange}
+          placeholder="(XXX) XXX-XXXX"
         />
       </div>
 
@@ -77,32 +77,22 @@ export function ReservaForm({
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Seleccioná los servicios que necesitás
         </p>
-        <div className="grid grid-cols-2 gap-3 pt-2">
+        <div className="flex flex-wrap gap-2 pt-2">
           {SERVICIOS_DISPONIBLES.map((servicio) => (
-            <div key={servicio} className="flex items-center space-x-2">
-              <Checkbox
-                id={servicio}
-                checked={selectedServicios.includes(servicio)}
-                onCheckedChange={() => onServicioToggle(servicio)}
-              />
-              <label
-                htmlFor={servicio}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-              >
-                {servicio}
-              </label>
-            </div>
+            <Toggle
+              key={servicio}
+              pressed={selectedServicios.includes(servicio)}
+              onPressedChange={() => onServicioToggle(servicio)}
+              variant="outline"
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground transition-all duration-200"
+            >
+              {selectedServicios.includes(servicio) && (
+                <Check className="mr-2 h-4 w-4 animate-in fade-in zoom-in duration-200" />
+              )}
+              {servicio}
+            </Toggle>
           ))}
         </div>
-        {selectedServicios.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
-            {selectedServicios.map((servicio) => (
-              <Badge key={servicio} variant="secondary">
-                {servicio}
-              </Badge>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
