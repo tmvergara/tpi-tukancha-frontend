@@ -394,12 +394,6 @@ export default function TorneoDetallePage() {
                     ? "Este torneo no tuvo equipos participantes"
                     : "Agrega equipos para comenzar el torneo"}
                 </p>
-                {can("torneos:create") && !isTorneoFinalizado && (
-                  <Button onClick={() => setCreateEquipoOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Agregar Equipo
-                  </Button>
-                )}
               </CardContent>
             </Card>
           ) : (
@@ -508,12 +502,6 @@ export default function TorneoDetallePage() {
                     ? "Este torneo no tuvo partidos programados"
                     : "Programa partidos para comenzar el fixture"}
                 </p>
-                {can("torneos:create") && !isTorneoFinalizado && (
-                  <Button onClick={() => setCreatePartidoOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Programar Partido
-                  </Button>
-                )}
               </CardContent>
             </Card>
           ) : (
