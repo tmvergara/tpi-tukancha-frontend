@@ -191,6 +191,13 @@ export default function ReservaManualPage() {
     }));
   };
 
+  const handleTelefonoChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      telefono: value,
+    }));
+  };
+
   const handleServicioToggle = (servicio: string) => {
     setSelectedServicios((prev) =>
       prev.includes(servicio)
@@ -419,7 +426,7 @@ export default function ReservaManualPage() {
 
       {/* Dialog de selección de cancha y formulario */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>
               {!selectedCancha
@@ -433,62 +440,65 @@ export default function ReservaManualPage() {
             </DialogDescription>
           </DialogHeader>
 
-          {!selectedCancha ? (
-            // Lista de canchas disponibles
-            <div className="space-y-3 mt-4">
-              {selectedHorario?.canchas_disponibles.map((cancha) => (
-                <CanchaCard
-                  key={cancha.timeslot_id}
-                  cancha={cancha}
-                  onClick={() => handleCanchaSelect(cancha)}
-                />
-              ))}
-            </div>
-          ) : (
-            // Formulario de reserva
-            <div className="space-y-6 mt-4">
-              {date && (
-                <ReservaResumen
-                  cancha={selectedCancha}
-                  fecha={date}
-                  horario={selectedHorario!}
-                />
-              )}
-
-              <ReservaForm
-                formData={formData}
-                selectedServicios={selectedServicios}
-                onFormChange={handleFormChange}
-                onServicioToggle={handleServicioToggle}
-              />
-
-              {/* Botones */}
-              <div className="flex gap-3 justify-end pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedCancha(null);
-                    setSelectedServicios([]);
-                  }}
-                  disabled={isCreatingReserva}
-                >
-                  Volver
-                </Button>
-                <Button
-                  onClick={handleConfirmReserva}
-                  disabled={
-                    !formData.nombre ||
-                    !formData.telefono ||
-                    !formData.email ||
-                    selectedServicios.length === 0 ||
-                    isCreatingReserva
-                  }
-                >
-                  {isCreatingReserva ? "Creando reserva..." : "Crear reserva"}
-                </Button>
+          <div className="overflow-y-auto flex-1 -mx-6 px-6">
+            {!selectedCancha ? (
+              // Lista de canchas disponibles
+              <div className="space-y-3 mt-4">
+                {selectedHorario?.canchas_disponibles.map((cancha) => (
+                  <CanchaCard
+                    key={cancha.timeslot_id}
+                    cancha={cancha}
+                    onClick={() => handleCanchaSelect(cancha)}
+                  />
+                ))}
               </div>
-            </div>
-          )}
+            ) : (
+              // Formulario de reserva
+              <div className="space-y-6 mt-4">
+                {date && (
+                  <ReservaResumen
+                    cancha={selectedCancha}
+                    fecha={date}
+                    horario={selectedHorario!}
+                  />
+                )}
+
+                <ReservaForm
+                  formData={formData}
+                  selectedServicios={selectedServicios}
+                  onFormChange={handleFormChange}
+                  onTelefonoChange={handleTelefonoChange}
+                  onServicioToggle={handleServicioToggle}
+                />
+
+                {/* Botones */}
+                <div className="flex gap-3 justify-end pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedCancha(null);
+                      setSelectedServicios([]);
+                    }}
+                    disabled={isCreatingReserva}
+                  >
+                    Volver
+                  </Button>
+                  <Button
+                    onClick={handleConfirmReserva}
+                    disabled={
+                      !formData.nombre ||
+                      !formData.telefono ||
+                      !formData.email ||
+                      selectedServicios.length === 0 ||
+                      isCreatingReserva
+                    }
+                  >
+                    {isCreatingReserva ? "Creando reserva..." : "Crear reserva"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
