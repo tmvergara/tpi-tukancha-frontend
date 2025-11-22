@@ -289,7 +289,7 @@ export default function AjustesClubPage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">
-                        Torneos Activos
+                        Torneos
                       </p>
                       <p className="flex items-center gap-2">
                         <Trophy className="h-4 w-4 text-muted-foreground" />
