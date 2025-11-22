@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmailInput } from "@/components/ui/email-input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -240,16 +241,15 @@ export function UserCreateDialog({
           </div>
           <div className="space-y-2">
             <Label htmlFor="create-telefono">Teléfono</Label>
-            <Input
-              id="create-telefono"
+            <PhoneInput
               value={formData.telefono}
-              onChange={(e) =>
+              onChange={(value) =>
                 setFormData({
                   ...formData,
-                  telefono: e.target.value,
+                  telefono: value,
                 })
               }
-              placeholder="123456789"
+              placeholder="(XXX) XXX-XXXX"
             />
           </div>
           <div className="space-y-2">
