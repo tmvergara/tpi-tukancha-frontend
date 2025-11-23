@@ -825,9 +825,6 @@ export function SignupForm({
                       </FieldDescription>
                     )}
                   </Field>
-                  <FieldDescription>
-                    La contraseña debe tener al menos 8 caracteres.
-                  </FieldDescription>
                 </>
               )}
 
