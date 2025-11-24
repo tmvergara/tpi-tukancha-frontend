@@ -23,6 +23,13 @@ import {
   IconCurrencyDollar,
   IconFilter,
 } from "@tabler/icons-react";
+import { ChevronDownIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { API_URL } from "@/lib/config";
 import { ReservasPorCancha } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -62,8 +69,10 @@ export default function ReservasPorCanchaPage() {
   const [canchas, setCanchas] = useState<Cancha[]>([]);
   const [loading, setLoading] = useState(true);
   const [canchaId, setCanchaId] = useState<string>("");
-  const [fechaInicio, setFechaInicio] = useState("");
-  const [fechaFin, setFechaFin] = useState("");
+  const [fechaInicio, setFechaInicio] = useState<Date | undefined>(undefined);
+  const [fechaFin, setFechaFin] = useState<Date | undefined>(undefined);
+  const [openFechaInicio, setOpenFechaInicio] = useState(false);
+  const [openFechaFin, setOpenFechaFin] = useState(false);
 
   useEffect(() => {
     fetchCanchas();
@@ -92,8 +101,10 @@ export default function ReservasPorCanchaPage() {
       const params = new URLSearchParams();
 
       if (canchaId) params.append("cancha_id", canchaId);
-      if (fechaInicio) params.append("fecha_inicio", fechaInicio);
-      if (fechaFin) params.append("fecha_fin", fechaFin);
+      if (fechaInicio)
+        params.append("fecha_inicio", fechaInicio.toISOString().split("T")[0]);
+      if (fechaFin)
+        params.append("fecha_fin", fechaFin.toISOString().split("T")[0]);
 
       const url = `${API_URL}/reportes/reservas-por-cancha${
         params.toString() ? `?${params}` : ""
@@ -114,8 +125,8 @@ export default function ReservasPorCanchaPage() {
 
   const handleClearFilters = () => {
     setCanchaId("");
-    setFechaInicio("");
-    setFechaFin("");
+    setFechaInicio(undefined);
+    setFechaFin(undefined);
   };
 
   const formatCurrency = (amount: string) => {
@@ -186,22 +197,64 @@ export default function ReservasPorCanchaPage() {
 
             <div className="space-y-2">
               <Label>Fecha Inicio</Label>
-              <input
-                type="date"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={fechaInicio}
-                onChange={(e) => setFechaInicio(e.target.value)}
-              />
+              <Popover open={openFechaInicio} onOpenChange={setOpenFechaInicio}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between font-normal"
+                  >
+                    {fechaInicio
+                      ? fechaInicio.toLocaleDateString("es-AR")
+                      : "Seleccionar fecha"}
+                    <ChevronDownIcon className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-auto overflow-hidden p-0"
+                  align="start"
+                >
+                  <Calendar
+                    mode="single"
+                    selected={fechaInicio}
+                    captionLayout="dropdown"
+                    onSelect={(date) => {
+                      setFechaInicio(date);
+                      setOpenFechaInicio(false);
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">
               <Label>Fecha Fin</Label>
-              <input
-                type="date"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={fechaFin}
-                onChange={(e) => setFechaFin(e.target.value)}
-              />
+              <Popover open={openFechaFin} onOpenChange={setOpenFechaFin}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between font-normal"
+                  >
+                    {fechaFin
+                      ? fechaFin.toLocaleDateString("es-AR")
+                      : "Seleccionar fecha"}
+                    <ChevronDownIcon className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-auto overflow-hidden p-0"
+                  align="start"
+                >
+                  <Calendar
+                    mode="single"
+                    selected={fechaFin}
+                    captionLayout="dropdown"
+                    onSelect={(date) => {
+                      setFechaFin(date);
+                      setOpenFechaFin(false);
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">

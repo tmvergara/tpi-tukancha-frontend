@@ -22,6 +22,13 @@ import {
   IconBallFootball,
   IconCalendar,
 } from "@tabler/icons-react";
+import { ChevronDownIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { API_URL } from "@/lib/config";
 import { UtilizacionMensual } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -39,8 +46,6 @@ import {
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
-  Line,
-  LineChart,
 } from "recharts";
 import { authenticatedFetch } from "@/lib/auth";
 
@@ -63,9 +68,10 @@ export default function UtilizacionDeCanchasPage() {
   const [canchas, setCanchas] = useState<Cancha[]>([]);
   const [loading, setLoading] = useState(true);
   const [canchaId, setCanchaId] = useState<string>("");
-  const [fechaInicio, setFechaInicio] = useState("");
-  const [fechaFin, setFechaFin] = useState("");
-  const [chartType, setChartType] = useState<"area" | "line">("area");
+  const [fechaInicio, setFechaInicio] = useState<Date | undefined>(undefined);
+  const [fechaFin, setFechaFin] = useState<Date | undefined>(undefined);
+  const [openFechaInicio, setOpenFechaInicio] = useState(false);
+  const [openFechaFin, setOpenFechaFin] = useState(false);
 
   useEffect(() => {
     fetchCanchas();
@@ -73,8 +79,8 @@ export default function UtilizacionDeCanchasPage() {
     // Establecer fechas por defecto (último año)
     const today = new Date();
     const lastYear = new Date(today.getFullYear() - 1, today.getMonth(), 1);
-    setFechaInicio(lastYear.toISOString().split("T")[0]);
-    setFechaFin(today.toISOString().split("T")[0]);
+    setFechaInicio(lastYear);
+    setFechaFin(today);
   }, []);
 
   useEffect(() => {
@@ -102,8 +108,10 @@ export default function UtilizacionDeCanchasPage() {
       const params = new URLSearchParams();
 
       if (canchaId) params.append("cancha_id", canchaId);
-      if (fechaInicio) params.append("fecha_inicio", fechaInicio);
-      if (fechaFin) params.append("fecha_fin", fechaFin);
+      if (fechaInicio)
+        params.append("fecha_inicio", fechaInicio.toISOString().split("T")[0]);
+      if (fechaFin)
+        params.append("fecha_fin", fechaFin.toISOString().split("T")[0]);
 
       const url = `${API_URL}/reportes/utilizacion-mensual${
         params.toString() ? `?${params}` : ""
@@ -126,8 +134,8 @@ export default function UtilizacionDeCanchasPage() {
     setCanchaId("");
     const today = new Date();
     const lastYear = new Date(today.getFullYear() - 1, today.getMonth(), 1);
-    setFechaInicio(lastYear.toISOString().split("T")[0]);
-    setFechaFin(today.toISOString().split("T")[0]);
+    setFechaInicio(lastYear);
+    setFechaFin(today);
   };
 
   // Transformar datos para el gráfico
@@ -212,7 +220,7 @@ export default function UtilizacionDeCanchasPage() {
           <CardTitle>Filtros</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-5">
+          <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
               <Label>Cancha</Label>
               <Select value={canchaId} onValueChange={setCanchaId}>
@@ -232,38 +240,64 @@ export default function UtilizacionDeCanchasPage() {
 
             <div className="space-y-2">
               <Label>Fecha Inicio</Label>
-              <input
-                type="date"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={fechaInicio}
-                onChange={(e) => setFechaInicio(e.target.value)}
-              />
+              <Popover open={openFechaInicio} onOpenChange={setOpenFechaInicio}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between font-normal"
+                  >
+                    {fechaInicio
+                      ? fechaInicio.toLocaleDateString("es-AR")
+                      : "Seleccionar fecha"}
+                    <ChevronDownIcon className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-auto overflow-hidden p-0"
+                  align="start"
+                >
+                  <Calendar
+                    mode="single"
+                    selected={fechaInicio}
+                    captionLayout="dropdown"
+                    onSelect={(date) => {
+                      setFechaInicio(date);
+                      setOpenFechaInicio(false);
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">
               <Label>Fecha Fin</Label>
-              <input
-                type="date"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={fechaFin}
-                onChange={(e) => setFechaFin(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Tipo de Gráfico</Label>
-              <Select
-                value={chartType}
-                onValueChange={(val: "area" | "line") => setChartType(val)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="area">Área</SelectItem>
-                  <SelectItem value="line">Líneas</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover open={openFechaFin} onOpenChange={setOpenFechaFin}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between font-normal"
+                  >
+                    {fechaFin
+                      ? fechaFin.toLocaleDateString("es-AR")
+                      : "Seleccionar fecha"}
+                    <ChevronDownIcon className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-auto overflow-hidden p-0"
+                  align="start"
+                >
+                  <Calendar
+                    mode="single"
+                    selected={fechaFin}
+                    captionLayout="dropdown"
+                    onSelect={(date) => {
+                      setFechaFin(date);
+                      setOpenFechaFin(false);
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">
@@ -354,45 +388,36 @@ export default function UtilizacionDeCanchasPage() {
             <CardContent>
               <ChartContainer config={chartConfig} className="h-[400px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  {chartType === "area" ? (
-                    <AreaChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" fontSize={12} tickMargin={10} />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <ChartLegend content={<ChartLegendContent />} />
-                      {data.series.map((serie, index) => (
-                        <Area
-                          key={serie.cancha.id}
-                          type="monotone"
-                          dataKey={serie.cancha.nombre}
-                          stroke={CHART_COLORS[index % CHART_COLORS.length]}
-                          fill={CHART_COLORS[index % CHART_COLORS.length]}
-                          fillOpacity={0.6}
-                          strokeWidth={2}
-                        />
-                      ))}
-                    </AreaChart>
-                  ) : (
-                    <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" fontSize={12} tickMargin={10} />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <ChartLegend content={<ChartLegendContent />} />
-                      {data.series.map((serie, index) => (
-                        <Line
-                          key={serie.cancha.id}
-                          type="monotone"
-                          dataKey={serie.cancha.nombre}
-                          stroke={CHART_COLORS[index % CHART_COLORS.length]}
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                          activeDot={{ r: 6 }}
-                        />
-                      ))}
-                    </LineChart>
-                  )}
+                  <AreaChart
+                    data={chartData}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="month"
+                      fontSize={12}
+                      tickMargin={10}
+                      angle={chartData.length > 6 ? -45 : 0}
+                      textAnchor={chartData.length > 6 ? "end" : "middle"}
+                      height={chartData.length > 6 ? 80 : 30}
+                    />
+                    <YAxis allowDecimals={false} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <ChartLegend content={<ChartLegendContent />} />
+                    {data.series.map((serie, index) => (
+                      <Area
+                        key={serie.cancha.id}
+                        type="monotone"
+                        dataKey={serie.cancha.nombre}
+                        stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                        fill={CHART_COLORS[index % CHART_COLORS.length]}
+                        fillOpacity={0.6}
+                        strokeWidth={3}
+                        dot={{ r: 5, strokeWidth: 2 }}
+                        activeDot={{ r: 7 }}
+                      />
+                    ))}
+                  </AreaChart>
                 </ResponsiveContainer>
               </ChartContainer>
             </CardContent>
