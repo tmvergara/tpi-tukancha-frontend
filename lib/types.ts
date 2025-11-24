@@ -103,3 +103,58 @@ export interface ReservaResponse {
   created_at: string;
   updated_at: string;
 }
+
+// Tipos para Reportes
+export interface ReservaReporte {
+  id: number;
+  cancha_id: number;
+  cliente_nombre: string;
+  cliente_email: string;
+  cliente_telefono: string;
+  precio_total: string;
+  fuente: string;
+  servicios: string;
+  estado: string;
+  created_at: string;
+  timeslots: any[];
+}
+
+export interface ReservasPorCliente {
+  cliente_email: string;
+  cliente_nombre: string;
+  cliente_telefono: string;
+  reservas: ReservaReporte[];
+}
+
+export interface CanchaReporte {
+  id: number;
+  nombre: string;
+  deporte: string;
+  precio_hora: string;
+}
+
+export interface ReservasPorCancha {
+  cancha: CanchaReporte;
+  total_reservas: number;
+  total_ingresos: string;
+  reservas: ReservaReporte[];
+}
+
+export interface CanchaMasUtilizada {
+  cancha: CanchaReporte;
+  reservas_count: number;
+  total_ingresos: string;
+  porcentaje_utilizacion: string;
+}
+
+export interface UtilizacionMensual {
+  months: string[];
+  series: {
+    cancha: {
+      id: number;
+      nombre: string;
+      deporte: string;
+    };
+    data: number[];
+  }[];
+}
